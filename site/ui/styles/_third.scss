@@ -1,0 +1,15 @@
+.third {
+  display: inline-block;
+  position: relative;
+  margin: 0;
+  width: $third-width;
+  height: $third-height;
+  background-color: white;
+  vertical-align: top;
+  &:not(:last-child) {
+    margin-right: $bezel;
+  }
+  &:not(:first-child) {
+    margin-left: $bezel;
+  }
+}

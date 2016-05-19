@@ -1,0 +1,17 @@
+/*
+
+SAMPLE CONFIG BELOW.
+Make sure these paths are relative to the Vagrant machine,
+not to your actual computer's filesystem.
+
+var config = {};
+
+config.inDir = '/in';
+config.outDir = '/out';
+config.processing_port = 8081;
+config.display_port = 8080;
+config.api_key = '';
+
+module.exports = config;
+
+*/

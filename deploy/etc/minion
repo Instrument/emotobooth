@@ -1,0 +1,10 @@
+file_client: local
+
+file_roots:
+  base:
+    - /vagrant/deploy/salt/
+    - /vagrant/deploy/formulas/nvm-formula/
+
+pillar_roots:
+  base:
+    - /vagrant/deploy/pillar/

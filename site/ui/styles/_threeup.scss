@@ -1,0 +1,53 @@
+.threeup-wrap {
+  width: $third-width;
+  height: $threeup-height;
+  display: inline-block;
+
+  @for $i from 0 through 9 {
+    $col: $i % 3;
+    $row: floor(( 9 - (9 - $i)) / 3);
+    &:nth-child(#{ $i + 1}) {
+      .threeup-hero {
+        transform-origin: #{ $third-width * ( $col * 1.5 ) + ( $col * $grid-bezel * 2 ) } #{ $threeup-height * ( $row * 1.5 ) };
+      }
+    }
+  }
+  &:nth-child(3n-2) {
+    margin-right: $grid-bezel;
+  }
+  &:nth-child(3n-1) {
+    margin-left: $grid-bezel;
+    margin-right: $grid-bezel;
+  }
+  &:nth-child(3n) {
+    margin-left: $grid-bezel;
+  }
+}
+
+.threeup {
+  width: $third-width;
+  height: $threeup-height;
+  background-size: cover;
+  background-position: top left;
+  box-sizing: border-box;
+}
+
+.threeup-hero {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: $third-width * 3 + $grid-bezel * 4;
+  height: (($third-width * 3 + $grid-bezel * 4) / ($third-width * 3)) * $third-height;
+  transform: scale(0.33333333);
+  display: inline-block;
+  background-size: cover;
+  background-position: top left;
+  transition-property: transform;
+  transition-duration: 2s;
+  transform-origin: 0 0;
+  backface-visibility: hidden;
+}
+
+.threeup-hero-active {
+  transform: none;
+}

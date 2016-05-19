@@ -1,0 +1,7 @@
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script>
+  var socket = io.connect('http://localhost:8080');
+  socket.on('new_image', function (data) {
+    console.log(String(data));
+  });
+</script>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href='/aux.css' rel='stylesheet' type='text/css'>
+    <title>Emoto Booth: Keep / Kill Sessions</title>
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  </head>
+  <body>
+    <button class="keep-button" value="Keep" onClick="keep()">Keep</button>
+    <button class="kill-button" value="Kill" onClick="kill()">Kill</button>
+    <script>
+      var socket = io.connect('/');
+      function keep() {
+        socket.emit('endSession', {});
+      }
+      function kill() {
+        socket.emit('killSession', {});
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href='/aux.css' rel='stylesheet' type='text/css'>
+    <title>Emotobooth History</title>
+    <style>
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>
+        Emotobooth History
+      </h1>
+    </header>
+    <main class="main">
+
+    </main>
+    <script>
+      function deleteSession(e) {
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = () => {
+          e.target.parentElement.classList.add('deleted');
+        };
+        xhr.open('GET', '/delete-session/' + e.target.getAttribute('data-id'), true);
+        xhr.send();
+      }
+
+      let xhr = new XMLHttpRequest();
+      let sessions;
+      let main = document.getElementsByClassName('main')[0];
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          sessions = JSON.parse(xhr.responseText);
+          sessions.sort();
+
+          sessions.forEach((session) => {
+            session = JSON.parse(session);
+            sessionKeys = [];
+            sessionImages = [];
+
+            let sessDiv = document.createElement('div');
+            sessDiv.classList.add('session');
+            if (session.deleted) {
+              sessDiv.classList.add('deleted');
+            }
+
+            let title = document.createElement('h2');
+            if (!session.deleted) {
+              title.innerHTML = session.id;
+            } else {
+              title.innerHTML = `${ session.id } - DELETED`;
+            }
+            sessDiv.appendChild(title);
+
+            if (!session.deleted) {
+              let delButton = document.createElement('button');
+              delButton.setAttribute('data-id', session.id);
+              delButton.classList.add('delete-button');
+              delButton.innerHTML = 'DELETE';
+              delButton.addEventListener("click", deleteSession, false);
+              sessDiv.appendChild(delButton);
+            }
+
+
+            let sessionImgsWrap = document.createElement('div');
+            sessionImgsWrap.classList.add('history-images');
+            sessDiv.appendChild(sessionImgsWrap);
+
+            for (let key in session) {
+              if (session.hasOwnProperty(key) && typeof session[key] === 'object') {
+                sessionKeys.push(key.toString());
+              }
+            }
+
+            sessionKeys.forEach((key) => {
+              sessionImages.push(session[key]);
+              let img = document.createElement('img');
+              img.classList.add('history-image');
+              img.setAttribute('src', session[key].origPath);
+              sessionImgsWrap.appendChild(img);
+            });
+
+            main.appendChild(sessDiv);
+          })
+        }
+      };
+      xhr.open('GET', '/history-data', true);
+      xhr.send();
+    </script>
+  </body>
+</html>

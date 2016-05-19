@@ -1,0 +1,46 @@
+body {
+  font-family: sans-serif;
+  font-size: 16px;
+  color: #333;
+  max-width: 40em;
+  margin: 2em auto;
+  padding: 0 2em;
+}
+
+button {
+  font-size: 1rem;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  margin-right: 1em;
+}
+
+h1 {
+  border-bottom: solid 2px #eee;
+}
+
+.session {
+  margin-bottom: 2em;
+  padding-bottom: 1em;
+  border-bottom: solid 2px #ddd;
+}
+
+.delete-button, .kill-button {
+  background-color: red;
+}
+
+.deleted {
+  opacity: 0.5;
+}
+
+.keep-button {
+  background-color: green;
+}
+
+.history-images {
+  margin: 0.5em 0;
+}
+
+.history-image {
+  width: 300px;
+  max-width: 33%;
+}

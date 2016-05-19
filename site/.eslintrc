@@ -1,0 +1,19 @@
+{
+  "parser": "babel-eslint",
+  "extends": "eslint:recommended",
+  "rules": {
+    "arrow-body-style": [2, "always"],
+    "arrow-parens": 2,
+    "brace-style": [2, "1tbs"],
+    "eqeqeq": 2,
+    "no-control-regex": 0,
+    "no-else-return": 2,
+    "no-implicit-coercion": 2,
+    "no-this-before-super": 2,
+    "no-use-before-define": 2,
+    "no-var": 2,
+    "prefer-const": 2,
+    "prefer-template": 2,
+    "template-curly-spacing": [2, "always"]
+  }
+}

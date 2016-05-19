@@ -1,0 +1,4 @@
+file_roots:
+  base:
+    - /srv/salt/
+    - /srv/formulas/nvm-formula

@@ -1,0 +1,89 @@
+.controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 3rem;
+  width: 100%;
+  background-color: rgba(250, 250, 250, .3);
+  border-top: solid 1px #aaa;
+  box-sizing: border-box;
+  padding: .5rem 1rem;
+}
+
+.controls-section {
+  display: inline-block;
+  border-right: solid 1px #ccc;
+  margin-right: 1rem;
+  padding-right: 1rem;
+}
+
+.controls-button {
+  -webkit-appearance: none;
+  font-family: $stack;
+  border: 0;
+  height: 2rem;
+  height: 2rem;
+  box-sizing: border-box;
+  padding: 0 1rem;
+  color: #333;
+  background-color: #b3cee3;
+  cursor: pointer;
+  &:not(:last-child) {
+    margin-right: 1rem;
+  }
+  &:focus {
+    outline: none;
+    background-color: #69aadc;
+  }
+  &:disabled {
+    background-color: #ccc;
+    opacity: .6;
+    cursor: default;
+  }
+}
+
+.controls-radio-wrap {
+  display: inline-block;
+  &:not(:first-child) {
+    margin-left: 1rem;
+  }
+}
+
+.controls-views-choice {
+  display: none;
+  + .controls-views-label {
+    cursor: pointer;
+    background-color: #b3cee3;
+    &:hover, &:focus {
+      background-color: #69aadc;
+    }
+    &::before {
+      content: 'View ';
+    }
+    &::after {
+      content: '?';
+    }
+  }
+  &:checked + .controls-views-label {
+    cursor: default;
+    background-color: transparent;
+    &:hover, &:focus {
+      background-color: transparent;
+    }
+    &::before {
+      content: 'Now Viewing ';
+    }
+    &::after {
+      content: '';
+    }
+  }
+}
+
+.controls-views-label {
+  padding: 0 1em;
+  color: #333;
+  height: 2rem;
+  font-size: .75rem;
+  display: inline-block;
+  line-height: 2rem;
+}

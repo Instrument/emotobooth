@@ -1,0 +1,33 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "ubuntu/trusty64"
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 8192
+    v.cpus = 4
+  end
+
+  # Setup ports on your local box to talk to some of the services on the Vagrant box
+  # 'guest' is the Vagrant box, 'host' is your box
+  config.vm.network "forwarded_port", guest: 8081, host: 8081  # processing
+  config.vm.network "forwarded_port", guest: 8080, host: 8080  # display
+  config.vm.network "forwarded_port", guest: 5858, host: 5858  # node-debug
+  config.vm.network "public_network"
+  config.ssh.forward_agent = true
+
+  config.vm.synced_folder "..", "/vagrant"
+
+  config.vm.provision :salt do |salt|
+    salt.colorize = true
+    salt.log_level = "info"
+    salt.masterless = true
+    salt.minion_config = "etc/minion"
+    salt.run_highstate = true
+    # Some fix I found on a github issue to get salt to work
+    salt.bootstrap_options = '-F -c /tmp/ -P'
+  end
+end
