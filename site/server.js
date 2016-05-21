@@ -16,7 +16,11 @@ var request = require('request');
 var _ = require('underscore');
 var logger = require('winston');
 var socket = require('socket.io-client')('http://127.0.0.1:8080');
-var CREDENTIALS = require('./credentials.json');
+try {
+  var CREDENTIALS = require('./credentials.json');
+} catch (e) {
+  console.log("No social credentials were found. This is running in local mode only.")
+}
 var emote = require('./emote');
 var sessionImages = {};
 var sessionId = 1;
@@ -32,7 +36,15 @@ logger.level = 'debug';
 
 // Parse args, read config, and configure
 var argv = require('minimist')(process.argv.slice(2));
-var config = require('./config');
+try {
+  var config = require('./config');
+} catch (e) {
+  throw "No config.js file found. Please follow the format in config.js.example";
+}
+
+if (!config.api_key) {
+  throw "You need an API key in config.js in order to run this program. Please add to config.js";
+}
 
 config.port = argv.p || argv.port || config.port || 8081;
 config.displayPort = argv.displayp || argv.displayport || config.display_port || 8080;
@@ -60,8 +72,9 @@ client.hkeys("image-data", function (err, replies) {
   });
 });
 
-
-let socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
+if (CREDENTIALS) {
+  let socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
+}
 
 // Define job mapping
 var jobMapping = {
