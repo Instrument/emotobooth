@@ -2,61 +2,67 @@
 
 Take photos, send them through the [Cloud Vision API](https://cloud.google.com/vision/?utm_source=google&utm_medium=cpc&utm_campaign=2015-q1-cloud-na-gcp-skws-freetrial-de&gclid=CIWg6uaB1cwCFYaWvAodgI8OxQ), and display the results of their Sentiment Analysis.
 
-## git Practices
-
-Default branch is `dev`. Anything on that branch should be stable; anything on `master` should be something we could show to the client / potentially release.
-
-Merge into `dev` via PRs, which you are fine to close yourself.
-
-Tag and create a new release when merging from `dev` into `master`.
-
-Branch off of `dev`, unless you're creating a hotfix.
-
-Todos are created as github issues; reference them in commits / PRs.
+![panel](/imgs/panel.png)
+![grid](/imgs/grid.png)
+Check out the [full Twitter feed](https://twitter.com/gcpemotobooth)!
 
 ## The process
 
 The `/in` directory watches for images being added; when the machine receives the "end session" signal, it scores the new set of images based on their results from the Cloud Vision API's Sentiment Analysis. The highest-scoring are sent to the frontend; all are processed on the backend.
 
-## Quickstart
+## Config and Credentials
+
+1. Duplicate the `config.js.example` file and rename it `config.js`.
+1. Configure your ports and folder (these are relative to the `site` directory).
+1. Create those folders in the project (for example, `in/' and 'out/').
+1. Put your [API Key](https://console.cloud.google.com/apis/credentials) for the Cloud Vision API.
+
+## Installation
 
 * [Install Vagrant.](https://www.vagrantup.com/downloads.html)
-
 * Set up the Vagrant VM.
 ```
 cd deploy; vagrant up
 ```
-
 * Provision the VM
 ```
 vagrant provision
 ```
-
-* Load the processing and display server
+* **SKIP IF NOT ON WINDOWS** If you are on Windows and you plan to share socially, run these commands once for installation
 ```
 vagrant ssh
 cd /vagrant/site
+npm uninstall phantomjs-prebuilt
+npm install phantomjs-prebuilt --no-bin-links
 node server.js
-<output>
 ```
-
-* Process an image (on the Vagrant)
+* Start the server
 ```
-cp test.jpg in/
+vagrant ssh
+cd /vagrant/site
+npm uninstall phantomjs-prebuilt
+npm install phantomjs-prebuilt --no-bin-links
+node server.js
 ```
+* Load the [panel](http://localhost:8080) and [grid](http://localhost:8080?showgrid) front end pages (as seen above)
 
-OR copy an image to the `/in` directory on your host machine (the VM will see this).
+##Sessions
 
-* File will process
-```
-file /vagrant/site/out/test.png
-```
+Photos can be grouped together in sessions. To send photos to the front end and/or share them socially, follow these steps.
 
-* Observe job queue at [http://localhost:8081](http://localhost:8081)
+1. Add photo(s) (with faces, this is about emotions, after all!) into your in directory (by default, `site/in`). This can be done automatically by setting this folder as the directory where a digital camera outputs photos.
+2. Go to the [Keep/Kill](http://localhost:8080/buttons) page. To process the session, click on "Keep". To cancel session, click on "Kill". You will need to add more photos if you do this.
+3. Watch the [panel](http://localhost:8080) and [grid](http://localhost:8080?showgrid) pages to see the output.
+4. If you set up social sharing (see below), these sessions will be saved at this point.
 
-* To end the session and send the highest-scoring images to the frontend, press the "Keep" button on the [buttons page](http://localhost:8080/buttons).
+## Optional Social Sharing
 
-* After session is over, up to three images and their response JSON will animate in on the [main display](http://localhost:8080/) and the top image will become the hero on the [grid display](http://localhost:8080/?showgrid).
+This experience can post to [Twitter](https://twitter.com/GCPEmotobooth/status/733065931027423232) and [Github](https://gist.github.com/GCPEmotobooth/2c36647dc2fba279aa250d12ce8cb472), letting users easily share their photos.
+
+1. Duplicate the `credentials.js.example` file and rename it `credentials.js`.
+1. Fill this out with your credentials from Twitter and Github.
+1. From the terminal, run `ssh gist.github.com` to make sure you save your address to the known hosts.
+1. Add the `share` flag when running the server, so `node server.js --share`.
 
 ## Endpoints
 
