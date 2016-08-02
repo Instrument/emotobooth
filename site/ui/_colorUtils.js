@@ -32,15 +32,20 @@ export const SCRIM = 'rgb(0, 0, 0, 1)';
 export const SCRIM_MAX_ALPHA = 0.3;
 
 export const NEUTRAL = 'rgba(34, 45, 51, 1)';
+export const NEUTRAL_WHITE = 'rgba(255, 255, 255, 1)';
 export const TRANSPARENT = 'rgba(255, 255, 255, 0)';
 export const WHITE = 'rgba(255, 255, 255, 1)';
 export const BLACK = 'rgba(0, 0, 0, 1)';
 
 export const CERTAINTY_ALPHAS = {
-  VERY_UNLIKELY: 0,
-  UNLIKELY: 50,
-  POSSIBLE: 70,
-  LIKELY: 90,
+  // VERY_UNLIKELY: 0,
+  // UNLIKELY: 50,
+  // POSSIBLE: 70,
+  // LIKELY: 90,
+  VERY_UNLIKELY: 100,
+  UNLIKELY: 100,
+  POSSIBLE: 100,
+  LIKELY: 100,
   VERY_LIKELY: 100
 };
 
@@ -87,6 +92,22 @@ export function chooseRandomColorFromEmotion(emotion = null) {
 
   return color;
 }
+
+export function shadeRGBColor(color, percent) {
+  const f = color.split(",");
+  const sliceCount = f[0].includes('rgba') === true ? 5 : 4;
+  const t = percent < 0 ? 0 : 255;
+  const p = percent < 0 ? percent *- 1 : percent;
+  const R = parseInt(f[0].slice(sliceCount));
+  const G = parseInt(f[1]);
+  const B = parseInt(f[2]);
+  let returnVal = `rgba(${ (Math.round((t-R)*p)+R) },${ (Math.round((t-G)*p)+G) }, ${ (Math.round((t-B)*p)+B) }, 1)`
+  if (sliceCount === 4) {
+    returnVal = `rgb(${ (Math.round((t-R)*p)+R) },${ (Math.round((t-G)*p)+G) }, ${ (Math.round((t-B)*p)+B) })`
+  }
+  return returnVal;
+}
+
 
 export function getRandomColorWithAlpha(keyVal = null, key = null, val = null) {
 

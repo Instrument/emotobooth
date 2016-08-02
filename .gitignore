@@ -5,9 +5,13 @@ site/testImage.jpg
 node_modules
 site/config.js
 site/in
+site/in-test
+site/out-photostrips
+site/out-print
 site/out
 deploy/.vagrant
 src/node_modules
+CaptureOne/
 .*.swp
 .DS_Store
 npm-debug.log

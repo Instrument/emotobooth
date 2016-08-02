@@ -1,4 +1,4 @@
-/* global require, states */
+/* global require, states, single */
 
 'use strict';
 
@@ -33,19 +33,26 @@ export default class PanelComponent {
     this.timelines = [];
 
     this.animations = null;
-    json.responses[0].faceAnnotations.forEach((item, index) => {
-      faces.push(item);
-      if (index === json.responses[0].faceAnnotations.length - 1) {
-        this.faces = faceUtils.sortFaces(faces);
-        this.faces.forEach((face) => {
-          newJSON.push(face);
-        });
-        this.json = newJSON;
-        if (callback) {
-          callback();
+
+    if (json.responses[0].faceAnnotations) {
+      json.responses[0].faceAnnotations.forEach((item, index) => {
+        faces.push(item);
+        if (index === json.responses[0].faceAnnotations.length - 1) {
+          this.faces = faceUtils.sortFaces(faces);
+          this.faces.forEach((face) => {
+            newJSON.push(face);
+          });
+          this.json = newJSON;
+          if (callback) {
+            callback();
+          }
         }
+      });
+    } else if (single) {
+      if (callback) {
+        callback();
       }
-    });
+    }
   }
 
   getFaceInfo() {

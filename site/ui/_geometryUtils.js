@@ -71,17 +71,9 @@ export function midpointFromCoords(x1 = 0, x2 = 0, y1 = 0, y2 = 0) {
 }
 
 export function distanceFromCoords(point1 = null, point2 = null) {
-  // console.log(point1);
-  // console.log(point2);
-
   if (!point1 || !point2) {
     return 0;
   }
-
-  // console.log(Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2)));
-  // console.log(Math.pow(point2.y - point1.y, 2));
-
-  // console.log(Math.sqrt((Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y, point1.y, 2))));
 
   return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
 }
