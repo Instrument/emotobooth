@@ -13,7 +13,7 @@ page.open('http://localhost:8080/single?timing=' + args[3] + '&', function(statu
         page.render(args[2], {format: 'jpeg', quality: '100'});
         //page.close();
         phantom.exit();
-      }, 4000);
+      }, 1000);
     } else {
       console.log(page.injectJs(args[1]));
       //page.close();

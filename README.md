@@ -77,6 +77,7 @@ There are several querystrings that can be added to the main page's url to affec
 - `showgrid`: **the exception; we will want to use this on one of the production screens** shows the grid / historical view rather than the json / latest view.
 - `zoom`: resize UI so panels can fit, based on width, in your window.
 - `controls`: in json view, adds toolbar with shortcuts to taking certain photos to bottom of screen
+- `dontprint`: tells the application not to render final photostrip to the `site/out-print` folder
 - `prepopulate`: in grid view, uses pregenerated images to fill out grid if we don't actually have enough historical images to do so. Otherwise, only historical processed images will be used.
 - Timing options: to speed up or skip steps of the sequence. Defaults to `normal`.
   - `timing=fast&`: all steps run, but faster than usual.
@@ -84,6 +85,9 @@ There are several querystrings that can be added to the main page's url to affec
   - `timing=noFace&`: all face-related steps are skipped; only aura animates in.
   - `timing=noAura&`: all face-related steps run, and then the animation stops.
   - `timing=noChrome&`: all face and aura animations run, but chrome does not render.
+- Event options: Emotobooth supports multiple designs for different events, these are added and handled inside of main.js, here are the currently supported events
+  - `event=horizon`
+  - `event=next`
 
 ## Frontend Details
 
@@ -175,3 +179,46 @@ second argument.
 
 Random note: kue can't have multiple callbacks assigned to a single event, so
 two different jobs can't have the same `in` event assigned to them.
+
+
+## Photostrip Printer Setup
+
+The application is setup to create photostrips based off of each photo session, specific printer setup will vary, but below are tips for automatically printing folders as they are saved into the out-print folder.
+
+### PC
+
+#### Folder Agent:
+
+Folder Agent watches the print folder and sends photostrips to the printer to be printed.
+
+* Download Folder Agent from [http://www.folderagent.com](http://www.folderagent.com) and install it
+* Open folder agent
+* Create a new Folder Monitor
+* Select the "site/out-print" folder from the Emotobooth application folder
+* Click the + to add a new action
+* Under the Execute tab, select PowerShellScript
+* Replace the content with the following: ```C:\WINDOWS\System32\rundll32 C:\WINDOWS\System32\shimgvw.dll,ImageView_PrintTo "$path" "YOUR PRINTER NAME"```
+* Click OK
+* Add another action, under the Advanced tab select Sleep, Click Add
+* Add another action, select Move File
+* Click Move File and click the ... next to Destination Folder, click Insert and then Browse for folder
+* Select or create the site/out-printed folder
+* Click OK
+* Click Save, if prompted about existing files, click Yes
+* Leave Folder Agent running
+
+### Mac
+
+#### Automator:
+
+* Open Automator
+* Create a new Folder Action
+* Choose the folder you would like the printer to watch
+* on the left search Print and select Print Images
+* Select the middle Orientation option and select Mitsubishi in printer
+* Save
+* Files will now print when they are saved into the folder
+
+## Known Issues
+
+* Adding files to the /in folder that are the same name as something already in the folder, will cause blank photos to be generated, please make sure to only place uniquely named photos into this directory

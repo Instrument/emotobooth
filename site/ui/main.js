@@ -11,6 +11,7 @@ let zoom = false;
 let controls = false;
 let showGrid = false;
 let prepopulate = false;
+let dontPrint = false;
 
 const panels = [];
 let oldestPanel = null;
@@ -21,6 +22,7 @@ let oldestThreeup = null;
 let timingsType = 'normal';
 window.states = null;
 let newImage = null;
+let eventName = null;
 
 let refreshTimer = null;
 // faster timing for when images have not been processed for a while
@@ -43,7 +45,7 @@ function createPanel(jsonData) {
   if (panels.length < 3) {
     oldestPanel = (panels.length + 1);
 
-    const newPanel = new Panel(jsonData);
+    const newPanel = new Panel(jsonData, eventName);
     panels.push(newPanel);
   } else {
     if (jsonData.sessionId !== latestSessionId) {
@@ -174,19 +176,19 @@ function addNewImage(debugName, descriptor = -1) {
 
 function loadStatesAndTimes() {
   if (timingsType === 'fast') {
-    window.states = require('./_timings-fast.js');
+    window.states = require(`./timing/${ eventName }/_timings-fast.js`);
   } else if (timingsType === 'finalOnly') {
-    window.states = require('./_timings-finalOnly.js');
+    window.states = require(`./timing/${ eventName }/_timings-finalOnly.js`);
   } else if (timingsType === 'noFace') {
-    window.states = require('./_timings-noFace.js');
+    window.states = require(`./timing/${ eventName }/_timings-noFace.js`);
   } else if (timingsType === 'noAura') {
-    window.states = require('./_timings-noAura.js');
+    window.states = require(`./timing/${ eventName }/_timings-noAura.js`);
   } else if (timingsType === 'noChrome') {
-    window.states = require('./_timings-noChrome.js');
+    window.states = require(`./timing/${ eventName }/_timings-noChrome.js`);
   } else if (timingsType === 'finalOnlyNoChrome') {
-    window.states = require('./_timings-finalOnlyNoChrome.js');
+    window.states = require(`./timing/${ eventName }/_timings-finalOnlyNoChrome.js`);
   } else {
-    window.states = require('./_timings.js');
+    window.states = require(`./timing/${ eventName }/_timings.js`);
   }
 }
 
@@ -194,7 +196,15 @@ function setValuesBasedOnQueryStrings() {
   zoom = window.location.href.includes('zoom');
   controls = window.location.href.includes('controls');
   showGrid = window.location.href.includes('showgrid');
+  eventName = !window.location.href.includes('event') ? 'horizon' : window.location.href.split('event=')[1].split('&')[0].split('?')[0];
   timingsType = !window.location.href.includes('timing') ? 'normal' : window.location.href.split('timing=')[1].split('&')[0];
+  dontPrint = window.location.href.includes('dontprint');
+
+  // If dontPrint is true, send it to server.js
+  if (dontPrint) {
+    window.console.log('dont print')
+    socket.emit('dontprint', {});
+  }
 
   if (timingsType === 'noChrome' && window.location.pathname.includes('single')) {
     timingsType = 'finalOnlyNoChrome';

@@ -19,7 +19,7 @@ var socket = require('socket.io-client')('http://127.0.0.1:8080');
 try {
   var CREDENTIALS = require('./credentials.json');
 } catch (e) {
-  console.log("No social credentials were found. This is running in local mode only.")
+  console.log("No social credentials were found. This is running in local mode only.");
 }
 var emote = require('./emote');
 var sessionImages = {};
@@ -31,17 +31,19 @@ var http = require('http');
 var socketIO = require('socket.io');
 var phantomjs = require('phantomjs-prebuilt')
 var phantomBinPath = phantomjs.path;
+var dontPrint = false;
 
 logger.level = 'debug';
 
 // Parse args, read config, and configure
 var argv = require('minimist')(process.argv.slice(2));
+
 try {
   var config = require('./config');
 } catch (e) {
   throw "No config.js file found. Please follow the format in config.js.example";
 }
-
+ 
 if (!config.api_key) {
   throw "You need an API key in config.js in order to run this program. Please add to config.js";
 }
@@ -55,10 +57,18 @@ var app = express();
 var server = http.Server(app);
 var io = socketIO(server);
 
+// If the folder doesn't exist, create it
+var checkDirs = [config.inDir, config.outDir, config.printDir, config.photostripDir];
+checkDirs.forEach((dir) => {
+  if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+  }
+});
+
 // Remove all files currently contained within the `in` directory
-fs.readdir(config.inDir, function(err,files) {
-  files.forEach((file) => fs.unlink(config.inDir + file));
-})
+// fs.readdir(config.inDir, function(err,files) {
+//   files.forEach((file) => fs.unlink(config.inDir + file));
+// })
 
 // Create job queue
 var queue = kue.createQueue();
@@ -68,7 +78,7 @@ var client = redisPromises.createClient();
 client.hkeys("image-data", function (err, replies) {
   replies.forEach(function (reply, i) {
     // delete all historical images
-    // client.del('image-data', reply);
+    client.del('image-data', reply);
   });
 });
 
@@ -195,9 +205,11 @@ function connectJob(jobName, func) {
 
 function scoreImageData(data) {
   let score = 0;
-  let emotions = [];
+  const emotions = [];
+  let faces = 0;
   if (data.responses) {
     if (data.responses[0].faceAnnotations) {
+      faces = data.responses[0].faceAnnotations.length;
       data.responses[0].faceAnnotations.forEach((face) => {
         score += 40;
         EMOTIONS.NAMES.forEach((emotion) => {
@@ -214,7 +226,11 @@ function scoreImageData(data) {
       });
     }
   }
-  return {score, emotions};
+  // If score is 0, that means there is an error, set to last priority image
+  if (score === 0) {
+    score = -9999;
+  }
+  return {score, emotions, faces};
 }
 
 function scoreSession(sess) {
@@ -222,11 +238,12 @@ function scoreSession(sess) {
   let highestScoredKey = null;
   for (const key in sess) {
     if (key !== 'complete') {
-      let image = sess[key];
-      let scoreData = scoreImageData(JSON.parse(fs.readFileSync(config.outDir + image.id + '-resp.json', 'utf8')));
-      var score = scoreData.score;
+      const image = sess[key];
+      const scoreData = scoreImageData(JSON.parse(fs.readFileSync(config.outDir + image.id + '-resp.json', 'utf8')));
+      const score = scoreData.score;
       sess[key].emotions = scoreData.emotions;
       sess[key].score = score;
+      sess[key].faces = scoreData.faces;
       if (score > highScore) {
         highScore = score;
         highestScoredKey = key;
@@ -275,7 +292,9 @@ function sessionComplete(job, finish) {
         //     sess[key].finalPath = `${__dirname}/${sess[key].finalPath}`;
         //   }
         // }
+        // if (argv.share) {
         // //socialPublisher.share(sess);
+        // }
         // sessionIsComplete = false;
       } else {
         console.log('NOT ALL IMAGES HAVE BEEN PROCESSED!');
@@ -461,6 +480,7 @@ function getVisionData(job, finish) {
       json: jsonData
     }, (err, response, body) => {
       fs.writeFile(path.join(config.outDir, job.data.id + '-resp.json'), JSON.stringify(body), (err) => {
+        console.log('There was an error while recieving response data', err);
         job.data.respPath = path.join(config.outDir, job.data.id + '-resp.json');
         finish(job.data);
       });
@@ -483,6 +503,30 @@ function finishedImage(job, finish) {
   finish(job.data);
 }
 connectJob('finishedImage', finishedImage);
+
+function runPhantomPhotoStrip(childArgs) {
+  console.log("DONT PRINT ", dontPrint);
+  if (!dontPrint) {
+    cp.execFile(phantomBinPath, childArgs,
+      (err, stdout, stderr) => {
+        console.log(err, stdout, stderr);
+        if (err) {
+          console.log(err);
+        } else {
+          console.log('completed');
+        }
+      }
+    )
+  }
+}
+
+function compareScore(a,b) {
+  if (a.score < b.score)
+    return 1;
+  if (a.score > b.score)
+    return -1;
+  return 0;
+}
 
 function processFinalImages(sess) {
   console.log('PROCESS FINAL IMAGES');
@@ -511,13 +555,78 @@ function processFinalImages(sess) {
 
     //socket.emit('new_image', JSON.stringify(sess[sess.highestScoredKey]));
 
-    sess.id = (new Date()).getTime();
+    const finalSessionID = (new Date()).getTime();
+    sess.id = finalSessionID
 
-    if (argv.share) {
-      socialPublisher.share(sess);
-    } else {
-      saveSession(sess);
+    // Use overall session id to create a photostrip image path
+    const photostripPath = config.photostripDir + finalSessionID + '/';
+    //const renderPhotoStripPath = config.printDir + finalSessionID + '/';
+    const renderPhotoStripPath = config.printDir + finalSessionID;
+
+    // If the folder doesn't exist, create it
+    if (!fs.existsSync(photostripPath)){
+      fs.mkdirSync(photostripPath);
     }
+
+    const photostripImages = [];
+    const scoredPhotos = [];
+
+   // Copy each chromeless photo to the photostrip folder
+
+    // First push the scored images
+    for (let key in sess) {
+      if(sess[key].wasProcessed) {        
+        if (sess[key].score > 1) {
+          scoredPhotos.push({key: key, score: sess[key].score});
+        }
+      }
+    }
+
+    scoredPhotos.sort(compareScore);
+
+    let numberOfFaces = 1;
+
+    // Then push the unscored images
+    for (let key in sess) {
+      if(sess[key].faces){
+        if (sess[key].faces > numberOfFaces) {
+          numberOfFaces = sess[key].faces;
+        }
+      }
+      if(sess[key].wasProcessed) {        
+        if (sess[key].score <= 1) {
+          let scoreNum = sess[key].score;
+          scoredPhotos.push({key: key, score: scoreNum});
+        }
+      }
+    }
+
+    scoredPhotos.forEach((photo, index) => {
+      if (index < 4) {
+        const imageName = `${ sess[photo.key].id }.jpg`
+        const filePath = photostripPath + imageName;
+        photostripImages.push(imageName);
+        fs.createReadStream(sess[photo.key].chromelessPath).pipe(fs.createWriteStream(filePath));
+      }
+    });
+
+    // Call print function depending on how many faces there are
+    const printFaces = Math.ceil(numberOfFaces / 2);
+    for(let i = 0; i < printFaces; i++) {
+      const childArgs = [
+        path.join(__dirname, 'scripts/phantomPhotostripProcess.js'),
+        photostripPath,
+        `${ renderPhotoStripPath }-photostrip-${ i }.jpg`,
+        photostripImages
+      ];
+      runPhantomPhotoStrip(childArgs);
+    }
+
+    // if (argv.share) {
+    //   socialPublisher.share(sess);
+    // } else {
+    saveSession(sess);
+    // }
     // sessionIsComplete = false;
   } else {
     console.log(`images processed ${done} / ${count}`);
@@ -602,7 +711,10 @@ chokidar.watch(config.inDir, {
   setTimeout(() => {
     var stat = fs.statSync(imagePath);
     console.log('SIZE OF IMAGEPATH: ', stat.size);
-    newImage(imagePath)
+
+    console.log(imagePath, stat);
+
+    newImage(imagePath);
   }, 1000);
 });
 
@@ -738,6 +850,12 @@ io.on('connection', function(socket) {
     callNextJobs('sessionEnd', {
       id: uuid.v4()
     });
+  });
+
+  // If told not to print from the URL
+  socket.on('dontprint', (data) => {
+    console.log('dont print!!!!');
+    dontPrint = true;
   });
 
   socket.on('killSession', (data) => {

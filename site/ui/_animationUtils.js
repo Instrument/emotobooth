@@ -4,17 +4,18 @@ import * as colorUtils from './_colorUtils';
 import * as emotionUtils from './_emotionUtils';
 import * as geometryUtils from './_geometryUtils';
 
-export const CANVAS_WIDTH = 1080;
-export const CANVAS_HEIGHT = 640;
+import {
+  CANVAS_WIDTH,
+  BACKEND_CANVAS_WIDTH
+} from './image/_imageConst';
+
+import {EMOTION_STRENGTHS} from './_emotionUtils';
 
 export const HEX_LOWER_MIN_VERTICAL_MARGIN = 10;
 export const HEX_UPPER_MIN_VERTICAL_MARGIN = 30;
 export const HEX_MIN_BOTTOM_VERTICAL_MARGIN = 180;
 
 export const HEX_MIN_BOTTOM_EYES_MARGIN = 0.5;
-
-export const BACKEND_CANVAS_WIDTH = CANVAS_WIDTH * 2 - 112;
-export const BACKEND_CANVAS_HEIGHT = CANVAS_HEIGHT * 2;
 
 export const HEXAGON_CORNER_RADIUS = 10;
 
@@ -72,6 +73,47 @@ export const CERTAINTY_HALO_RADII = {
   VERY_LIKELY: 1.5
 };
 
+export function getStrongestColor(imageElement) {
+  const emo = imageElement.facesAndStrongestEmotions;
+  const emotionStrengths = [];
+  const returnColors = [];
+
+  function compareStrength(a,b) {
+    if (a.strength < b.strength)
+      return 1;
+    if (a.strength > b.strength)
+      return -1;
+    return 0;
+  }
+
+  emo.forEach((emotions, index) => {
+    let strength = EMOTION_STRENGTHS[emo[index][Object.keys(emo[index])[0]]];
+    if (!strength) strength = 0;
+    const emoObj = {index:index, strength: strength};
+    emotionStrengths.push(emoObj);
+  });
+
+  // Sort people by strength of emotion
+  emotionStrengths.sort(compareStrength);
+
+  emotionStrengths.forEach((item, index) => {
+    const personIndex = emotionStrengths[index].index;
+    const color = imageElement.treatments.personalAuraColors[personIndex][0];
+    if(color !== colorUtils.NEUTRAL) {
+      returnColors.push(imageElement.treatments.personalAuraColors[personIndex][0]);
+    }
+  });
+
+  return returnColors;
+      
+  // This was so if a person had 2 emotions, and the other had none, it would use the first persons strongest emotion
+  // returnColor = imageElement.treatments.personalAuraColors[strongestEmotion][0];
+  // if(returnColor === 'rgba(34, 45, 51, 1)') {
+  //   const changeTo = (strongestEmotion === 1) ? 0 : 1;
+  //   returnColor = imageElement.treatments.personalAuraColors[changeTo][0];
+  // }
+  // return returnColor;
+}
 
 export function generateSinglePersonTreatment(person) {
   const emotions = Object.keys(person);
@@ -88,7 +130,7 @@ export function generateSinglePersonTreatment(person) {
 
   let haloRadius = 1;
 
-  let backgroundColor = colorUtils.generateColorFromIndex(backgroundIndex, emotions);
+  const backgroundColor = colorUtils.generateColorFromIndex(backgroundIndex, emotions);
 
   let vignetteInnerColor = null;
   let vignetteOuterColor = null;
@@ -118,9 +160,9 @@ export function generateSinglePersonTreatment(person) {
       vignetteOuterColor = colorUtils.generateColorFromIndex(vignetteOuterIndex, emotions);
     }
 
-    if (emotionUtils.EMOTION_STRENGTHS[person[emotions[backgroundIndex]]] < 2) {
-      backgroundColor = colorUtils.subAlpha(backgroundColor, 0.3);
-    }
+    // if (emotionUtils.EMOTION_STRENGTHS[person[emotions[backgroundIndex]]] < 2) {
+    //   backgroundColor = colorUtils.subAlpha(backgroundColor, 0.3);
+    // }
 
     haloInnerColor = colorUtils.generateColorFromIndex(haloInnerIndex, emotions);
     haloOuterColor = haloInnerColor;
@@ -130,14 +172,14 @@ export function generateSinglePersonTreatment(person) {
 
     haloInnerColor = colorUtils.subAlpha(haloInnerColor, 0.75);
 
-    if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloInnerIndex]]] < 3) {
-      haloInnerColor = colorUtils.TRANSPARENT;
-    }
-    if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloOuterIndex]]] < 4) {
-      haloOuterColor = colorUtils.TRANSPARENT;
-    } else {
-      haloOuterColor = colorUtils.subAlpha(haloOuterColor, 0.75);
-    }
+    // if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloInnerIndex]]] < 3) {
+    //   haloInnerColor = colorUtils.TRANSPARENT;
+    // }
+    // if (emotionUtils.EMOTION_STRENGTHS[person[emotions[haloOuterIndex]]] < 4) {
+    //   haloOuterColor = colorUtils.TRANSPARENT;
+    // } else {
+    haloOuterColor = colorUtils.subAlpha(haloOuterColor, 0.75);
+    // }
   }
 
   haloRadius = CERTAINTY_HALO_RADII[person[emotions[haloInnerIndex]]];
