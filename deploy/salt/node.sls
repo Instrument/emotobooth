@@ -6,7 +6,7 @@ https://github.com/creationix/nvm.git:
   git.latest:
     - rev: master
     - target: {{ nvm_install_path }}
-    - force: True
+    - force_reset: True
 
 nvm_profile:
   file.blockreplace:
