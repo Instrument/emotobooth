@@ -28,6 +28,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     salt.minion_config = "etc/minion"
     salt.run_highstate = true
     # Some fix I found on a github issue to get salt to work
-    salt.bootstrap_options = '-F -c /tmp/ -P'
+    salt.bootstrap_options = '-F -c /tmp/ -P -p git'
   end
 end
