@@ -6,8 +6,10 @@ var fs = require('fs');
 var cp = require('child_process');
 
 module.exports = {
-  SocialPublisher: function(credentials, callback) {
+  SocialPublisher: function(credentials, callback, socialConfig) {
     this.callback = callback;
+    this.tweet = socialConfig[0];
+    this.eventName = socialConfig[1];
     this.github = new GitHubApi({
       // required
       version: "3.0.0",
@@ -46,10 +48,11 @@ module.exports = {
     this.uploadTweet = function(gistUrl, sessionData) {
       var photoData = fs.readFileSync(
         sessionData[sessionData.highestScoredKey].finalPathChrome);
+
       this.twitter.post('media/upload', {media: photoData}, function(err, media, response){
         if (!err) {
           var status = {
-            status: 'Thanks for visiting the @GCPEmotobooth! See all photos and data from this session → ' + gistUrl,
+            status: this.tweet + gistUrl,
             media_ids: media.media_id_string
           }
 
@@ -80,11 +83,10 @@ module.exports = {
       }
 
       this.github.gists.create({
-        'description': 'Google I/O photo session',
+        'description': this.eventName + ' session',
         'public': false,
         'files': files
       }, (err, res) => {
-          console.log('GIST CREATED AT: ' + res.id);
           sessionData.gistId = res.id;
           this.callback(sessionData);
           this.uploadPhotos(res.id, sessionData);

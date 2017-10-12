@@ -17,6 +17,11 @@ The `/in` directory watches for images being added; when the machine receives th
 1. Create those folders in the project (for example, `in/' and 'out/').
 1. Put your [API Key](https://console.cloud.google.com/apis/credentials) for the Cloud Vision API.
 
+### For "Horizon" computers
+1. Update the `config` directory for further configurable values.
+2. In `config.shl`, update your event name, git branch to auto pull from, and custom tweet
+3. Add your logo to print on photostrips as `logo.png`
+
 ## Installation
 
 * [Install Vagrant.](https://www.vagrantup.com/downloads.html)

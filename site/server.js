@@ -32,7 +32,9 @@ var socketIO = require('socket.io');
 var phantomjs = require('phantomjs-prebuilt')
 var phantomBinPath = phantomjs.path;
 var dontPrint = false;
-
+var socialConfig = [];
+let socialPublisher;
+const CONFIG_PATH = '/home/horizon/emotobooth/config/config.shl';
 logger.level = 'debug';
 
 // Parse args, read config, and configure
@@ -43,10 +45,36 @@ try {
 } catch (e) {
   throw "No config.js file found. Please follow the format in config.js.example";
 }
- 
 if (!config.api_key) {
   throw "You need an API key in config.js in order to run this program. Please add to config.js";
 }
+
+// Get social config
+var regex_tweet = new RegExp('^.*' + 'TWEET="' + '.*$', 'm');
+var regex_event_name = new RegExp('^.*' + 'EVENT_NAME="' + '.*$', 'm');
+
+fs.exists(CONFIG_PATH, function(fileok) {
+  if (fileok) {
+    fs.readFile(CONFIG_PATH, "utf8", function(err, data) {
+      var t = regex_tweet.exec(data);
+      var e = regex_event_name.exec(data);
+
+      if (t) {
+        var line = t[0];
+        socialConfig[0] = line.split('TWEET=')[1];
+      } else {
+        socialConfig[0] = "Thanks for visiting the @GCPEmotobooth! See all photos and data from this session → ";
+      }
+
+      if (e) {
+        var line = e[0];
+        socialConfig[1] = line.split('EVENT_NAME='[1]);
+      } else {
+        socialConfig[1] = "Emotobooth";
+      }
+    });
+  }
+});
 
 config.port = argv.p || argv.port || config.port || 8081;
 config.displayPort = argv.displayp || argv.displayport || config.display_port || 8080;
@@ -83,7 +111,7 @@ client.hkeys("image-data", function (err, replies) {
 });
 
 if (CREDENTIALS) {
-  let socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession);
+  socialPublisher = new SocialPublisher.SocialPublisher(CREDENTIALS, saveSession, socialConfig);
 }
 
 // Define job mapping
@@ -121,7 +149,7 @@ const EMOTIONS = {
     'UNLIKELY': 2,
     'POSSIBLE': 4,
     'LIKELY' : 8,
-    'VERY_LIKELY': 16
+    'VERY_LIKELY': 1
   }
 }
 
@@ -575,7 +603,7 @@ function processFinalImages(sess) {
 
     // First push the scored images
     for (let key in sess) {
-      if(sess[key].wasProcessed) {        
+      if(sess[key].wasProcessed) {
         if (sess[key].score > 1) {
           scoredPhotos.push({key: key, score: sess[key].score});
         }
@@ -593,7 +621,7 @@ function processFinalImages(sess) {
           numberOfFaces = sess[key].faces;
         }
       }
-      if(sess[key].wasProcessed) {        
+      if(sess[key].wasProcessed) {
         if (sess[key].score <= 1) {
           let scoreNum = sess[key].score;
           scoredPhotos.push({key: key, score: scoreNum});
@@ -622,11 +650,11 @@ function processFinalImages(sess) {
       runPhantomPhotoStrip(childArgs);
     }
 
-    // if (argv.share) {
-    //   socialPublisher.share(sess);
-    // } else {
-    saveSession(sess);
-    // }
+    if (argv.share) {
+      socialPublisher.share(sess);
+    } else {
+      saveSession(sess);
+    }
     // sessionIsComplete = false;
   } else {
     console.log(`images processed ${done} / ${count}`);
