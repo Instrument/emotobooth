@@ -149,7 +149,7 @@ const EMOTIONS = {
     'UNLIKELY': 2,
     'POSSIBLE': 4,
     'LIKELY' : 8,
-    'VERY_LIKELY': 1
+    'VERY_LIKELY': 16
   }
 }
 
