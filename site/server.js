@@ -32,7 +32,7 @@ var socketIO = require('socket.io');
 var phantomjs = require('phantomjs-prebuilt')
 var phantomBinPath = phantomjs.path;
 var dontPrint = false;
-var socialConfig = [];
+var socialConfig = ["Thanks for visiting the @GCPEmotobooth! See all photos and data from this session → ", "Emotobooth"];
 let socialPublisher;
 const CONFIG_PATH = '/home/horizon/emotobooth/config/config.shl';
 logger.level = 'debug';
@@ -62,15 +62,11 @@ fs.exists(CONFIG_PATH, function(fileok) {
       if (t) {
         var line = t[0];
         socialConfig[0] = line.split('TWEET=')[1];
-      } else {
-        socialConfig[0] = "Thanks for visiting the @GCPEmotobooth! See all photos and data from this session → ";
       }
 
       if (e) {
         var line = e[0];
         socialConfig[1] = line.split('EVENT_NAME='[1]);
-      } else {
-        socialConfig[1] = "Emotobooth";
       }
     });
   }
