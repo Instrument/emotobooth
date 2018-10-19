@@ -12,7 +12,7 @@ The `/in` directory watches for images being added; when the machine receives th
 
 ## Config and Credentials
 
-1. Duplicate the `config.js.example` file and rename it `config.js`.
+1. Duplicate the `site/config.js.example` file and rename it `site/config.js`.
 1. Configure your ports and folder (these are relative to the `site` directory).
 1. Create those folders in the project (for example, `in/' and 'out/').
 1. Put your [API Key](https://console.cloud.google.com/apis/credentials) for the Cloud Vision API.
