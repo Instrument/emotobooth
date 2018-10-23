@@ -1,4 +1,4 @@
 #!/bin/bash
 EVENT_NAME="Emotobooth"
-GIT_BRANCH="updates-new"
-TWEET="Thanks for visiting the @GCPEmotobooth! See all photos and data from this session → "
+GIT_BRANCH="november-event"
+TWEET=""
