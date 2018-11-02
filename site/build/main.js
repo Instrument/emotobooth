@@ -110,7 +110,7 @@
 	
 	'use strict';
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	var _panel = __webpack_require__(3);
 	
@@ -204,24 +204,20 @@
 	      newThreeup.manifest();
 	    }
 	  } else {
-	    (function () {
-	      var nextUpThreeup = threeups[oldestThreeup % 9];
-	      threeups.forEach(function (threeup) {
-	        if (nextUpThreeup === threeup) {
-	          threeup.newImage(jsonData.chromelessPath);
-	          oldestThreeup = (oldestThreeup + 1) % 9;
-	        } else {
-	          (function () {
-	            var num = Math.floor((threeupsHistoryClone.length - 1) * Math.random());
-	            var path = threeupsHistoryClone[num].chromelessPath;
-	            setTimeout(function () {
-	              threeup.newImage(path, true);
-	            }, 1000);
-	            threeupsHistoryClone.splice(num, 1);
-	          })();
-	        }
-	      });
-	    })();
+	    var nextUpThreeup = threeups[oldestThreeup % 9];
+	    threeups.forEach(function (threeup) {
+	      if (nextUpThreeup === threeup) {
+	        threeup.newImage(jsonData.chromelessPath);
+	        oldestThreeup = (oldestThreeup + 1) % 9;
+	      } else {
+	        var num = Math.floor((threeupsHistoryClone.length - 1) * Math.random());
+	        var path = threeupsHistoryClone[num].chromelessPath;
+	        setTimeout(function () {
+	          threeup.newImage(path, true);
+	        }, 1000);
+	        threeupsHistoryClone.splice(num, 1);
+	      }
+	    });
 	  }
 	}
 	
@@ -269,7 +265,7 @@
 	window.newImage = newImage;
 	
 	function showSection() {
-	  var sectionName = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	  var sectionName = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	  if (!sectionName) {
 	    return;
@@ -289,7 +285,7 @@
 	// in the case of single images, 'descriptor' is the number of emotions in the json file;
 	// for multiple, it's also the filename.
 	function addNewImage(debugName) {
-	  var descriptor = arguments.length <= 1 || arguments[1] === undefined ? -1 : arguments[1];
+	  var descriptor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
 	
 	  var jsonData = {
 	    id: debugName,
@@ -364,37 +360,35 @@
 	  }
 	
 	  if (prepopulate) {
-	    (function () {
-	      var xhr = new XMLHttpRequest();
-	      xhr.onreadystatechange = function () {
-	        if (xhr.readyState === XMLHttpRequest.DONE) {
-	          if (xhr.responseText !== ('null' || null)) {
-	            JSON.parse(xhr.responseText).forEach(function (sessionString) {
-	              var session = JSON.parse(sessionString);
-	              var image = session[session.highestScoredKey];
-	              if (!image.deleted) {
-	                var newThreeup = new _threeup2.default(image.chromelessPath);
-	                threeups.push(newThreeup);
-	                newThreeup.manifest();
-	                threeupsHistory.push(image);
-	              }
-	            });
-	          }
-	
-	          for (var i = threeupsHistory.length || 1; i < 10; i++) {
-	            var newThreeup = new _threeup2.default('out-debug/prepopulate' + i + '.jpg');
-	            threeups.push(newThreeup);
-	            newThreeup.manifest();
-	            threeupsHistory.push({
-	              chromelessPath: 'out-debug/prepopulate' + i + '.jpg',
-	              origPath: 'out-debug/prepopulate' + i + '.jpg'
-	            });
-	          }
+	    var xhr = new XMLHttpRequest();
+	    xhr.onreadystatechange = function () {
+	      if (xhr.readyState === XMLHttpRequest.DONE) {
+	        if (xhr.responseText !== ('null' || null)) {
+	          JSON.parse(xhr.responseText).forEach(function (sessionString) {
+	            var session = JSON.parse(sessionString);
+	            var image = session[session.highestScoredKey];
+	            if (!image.deleted) {
+	              var newThreeup = new _threeup2.default(image.chromelessPath);
+	              threeups.push(newThreeup);
+	              newThreeup.manifest();
+	              threeupsHistory.push(image);
+	            }
+	          });
 	        }
-	      };
-	      xhr.open('GET', '/history-data', true);
-	      xhr.send();
-	    })();
+	
+	        for (var i = threeupsHistory.length || 1; i < 10; i++) {
+	          var newThreeup = new _threeup2.default('out-debug/prepopulate' + i + '.jpg');
+	          threeups.push(newThreeup);
+	          newThreeup.manifest();
+	          threeupsHistory.push({
+	            chromelessPath: 'out-debug/prepopulate' + i + '.jpg',
+	            origPath: 'out-debug/prepopulate' + i + '.jpg'
+	          });
+	        }
+	      }
+	    };
+	    xhr.open('GET', '/history-data', true);
+	    xhr.send();
 	  }
 	
 	  if (zoom) {
@@ -499,7 +493,7 @@
 	  }, {
 	    key: 'manifest',
 	    value: function manifest() {
-	      var callback = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	      var third = document.createElement('section');
 	      third.classList.add('third');
@@ -523,9 +517,9 @@
 	  }, {
 	    key: 'newImage',
 	    value: function newImage() {
-	      var newOrigImgPath = arguments.length <= 0 || arguments[0] === undefined ? this.imagePath : arguments[0];
-	      var newReqPath = arguments.length <= 1 || arguments[1] === undefined ? this.reqPath : arguments[1];
-	      var newRespPath = arguments.length <= 2 || arguments[2] === undefined ? this.respPath : arguments[2];
+	      var newOrigImgPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.imagePath;
+	      var newReqPath = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.reqPath;
+	      var newRespPath = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.respPath;
 	
 	      this.imagePath = newOrigImgPath;
 	      this.reqPath = newReqPath;
@@ -713,13 +707,13 @@
 	  _inherits(ImageElement, _PanelComponent);
 	
 	  function ImageElement() {
-	    var imgPath = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
-	    var jsonPath = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
-	    var readyCallback = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+	    var imgPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+	    var jsonPath = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+	    var readyCallback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 	
 	    _classCallCheck(this, ImageElement);
 	
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ImageElement).call(this));
+	    var _this = _possibleConstructorReturn(this, (ImageElement.__proto__ || Object.getPrototypeOf(ImageElement)).call(this));
 	
 	    _this.canvasWidth = single ? imageConst.BACKEND_CANVAS_WIDTH : imageConst.CANVAS_WIDTH;
 	    _this.canvasHeight = single ? imageConst.BACKEND_CANVAS_HEIGHT : imageConst.CANVAS_HEIGHT;
@@ -813,7 +807,7 @@
 	        this.zoom(0, true);
 	        this.startAuraAnimations();
 	      } else {
-	        _get(Object.getPrototypeOf(ImageElement.prototype), 'startAnimations', this).call(this, function () {
+	        _get(ImageElement.prototype.__proto__ || Object.getPrototypeOf(ImageElement.prototype), 'startAnimations', this).call(this, function () {
 	          _this2.startAuraAnimations();
 	        });
 	      }
@@ -825,7 +819,7 @@
 	
 	      this.auraAnimations = new Timeline({
 	        onComplete: function onComplete() {
-	          _get(Object.getPrototypeOf(ImageElement.prototype), 'killTimeline', _this3).call(_this3, _this3.auraAnimations);
+	          _get(ImageElement.prototype.__proto__ || Object.getPrototypeOf(ImageElement.prototype), 'killTimeline', _this3).call(_this3, _this3.auraAnimations);
 	        }
 	      });
 	
@@ -850,7 +844,7 @@
 	    value: function reinitFaces(json) {
 	      var _this4 = this;
 	
-	      _get(Object.getPrototypeOf(ImageElement.prototype), 'reinitFaces', this).call(this, json, function () {
+	      _get(ImageElement.prototype.__proto__ || Object.getPrototypeOf(ImageElement.prototype), 'reinitFaces', this).call(this, json, function () {
 	        var stepsToKill = [_this4.flashStep, _this4.faceStep, _this4.zoomStep, _this4.emotionStep, _this4.backgroundStep, _this4.mutliAuraStep, _this4.vignetteStep, _this4.haloStep, _this4.chromeStep];
 	        stepsToKill.forEach(function (step) {
 	          if (step) {
@@ -907,119 +901,119 @@
 	  }, {
 	    key: 'flash',
 	    value: function flash() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.flashStep = new _flashStep2.default(this, this.canvas, this.context, duration);
 	    }
 	  }, {
 	    key: 'zoom',
 	    value: function zoom() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.zoomStep.zoom(duration, false);
 	    }
 	  }, {
 	    key: 'face',
 	    value: function face() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.face(duration);
 	    }
 	  }, {
 	    key: 'forehead',
 	    value: function forehead() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.forehead(duration);
 	    }
 	  }, {
 	    key: 'eyes',
 	    value: function eyes() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.eyes(duration);
 	    }
 	  }, {
 	    key: 'ears',
 	    value: function ears() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.ears(duration);
 	    }
 	  }, {
 	    key: 'nose',
 	    value: function nose() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.nose(duration);
 	    }
 	  }, {
 	    key: 'mouth',
 	    value: function mouth() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.mouth(duration);
 	    }
 	  }, {
 	    key: 'chin',
 	    value: function chin() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.chin(duration);
 	    }
 	  }, {
 	    key: 'allFeatures',
 	    value: function allFeatures() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.allFeatures(duration);
 	    }
 	  }, {
 	    key: 'zoomOut',
 	    value: function zoomOut() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.zoomStep.zoom(duration, true);
 	    }
 	  }, {
 	    key: 'emotion',
 	    value: function emotion() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.emotionStep = new _emotionStep2.default(this, this.canvas, this.context, duration);
 	    }
 	  }, {
 	    key: 'animateInBackground',
 	    value: function animateInBackground() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.backgroundStep = new _backgroundStep2.default(this, this.canvas, this.context, duration);
 	    }
 	  }, {
 	    key: 'animateInMultiAura',
 	    value: function animateInMultiAura() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.mutliAuraStep = new _multiAuraStep2.default(this, this.canvas, this.context, duration);
 	    }
 	  }, {
 	    key: 'animateInVignette',
 	    value: function animateInVignette() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.vignetteStep = new _vignetteStep2.default(this, this.canvas, this.context, duration);
 	    }
 	  }, {
 	    key: 'animateInHalo',
 	    value: function animateInHalo() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.haloStep = new _haloStep2.default(this, this.canvas, this.context, duration);
 	    }
 	  }, {
 	    key: 'chrome',
 	    value: function chrome() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.chromeStep = new _chromeStep2.default(this, this.canvas, this.context, duration);
 	    }
@@ -1085,7 +1079,7 @@
 	    value: function reinitFaces(json) {
 	      var _this = this;
 	
-	      var callback = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+	      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 	
 	      this.currFace = 0;
 	      var faces = [];
@@ -1132,7 +1126,7 @@
 	    value: function getEmotionInfo() {
 	      var _this3 = this;
 	
-	      var face = arguments.length <= 0 || arguments[0] === undefined ? this.currFace : arguments[0];
+	      var face = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.currFace;
 	
 	      var json = {};
 	      emotionUtils.EMOTION_LIKELIHOODS.forEach(function (section) {
@@ -1179,7 +1173,7 @@
 	  }, {
 	    key: 'killTimeline',
 	    value: function killTimeline() {
-	      var timeline = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	      var timeline = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	      if (!timeline) {
 	        return;
@@ -1196,7 +1190,7 @@
 	  }, {
 	    key: 'killTween',
 	    value: function killTween() {
-	      var tween = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	      var tween = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	      if (!tween) {
 	        return;
@@ -1211,7 +1205,7 @@
 	    value: function startAnimations() {
 	      var _this5 = this;
 	
-	      var callback = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	      this.animations = new Timeline({
 	        onComplete: function onComplete() {
@@ -1297,7 +1291,7 @@
 	
 	// sort faces, left to right, based on their left edges.
 	function sortFaces() {
-	  var faces = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	  var faces = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 	
 	  faces.sort(function (a, b) {
 	    return a.boundingPoly.vertices[0].x - b.boundingPoly.vertices[0].x;
@@ -1306,8 +1300,8 @@
 	}
 	
 	function generateFacesAndEmotions() {
-	  var faces = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-	  var strongestOnly = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+	  var faces = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+	  var strongestOnly = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 	
 	  var facesAndEmotions = [];
 	
@@ -1436,7 +1430,7 @@
 	};
 	
 	function getStrongestEmotions(emotionsRaw) {
-	  var numToChoose = arguments.length <= 1 || arguments[1] === undefined ? 2 : arguments[1];
+	  var numToChoose = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
 	
 	  var emotionTiers = [];
 	  for (var i = 0; i < Object.keys(EMOTION_STRENGTHS).length; i++) {
@@ -1517,8 +1511,8 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	var Point = exports.Point = function Point() {
-	  var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var y = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+	  var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	  var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 	
 	  _classCallCheck(this, Point);
 	
@@ -1527,10 +1521,10 @@
 	};
 	
 	var BoundingRect = exports.BoundingRect = function BoundingRect() {
-	  var pointTopLeft = arguments.length <= 0 || arguments[0] === undefined ? new Point() : arguments[0];
-	  var pointTopRight = arguments.length <= 1 || arguments[1] === undefined ? new Point() : arguments[1];
-	  var pointBottomRight = arguments.length <= 2 || arguments[2] === undefined ? new Point() : arguments[2];
-	  var pointBottomLeft = arguments.length <= 3 || arguments[3] === undefined ? new Point() : arguments[3];
+	  var pointTopLeft = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Point();
+	  var pointTopRight = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Point();
+	  var pointBottomRight = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Point();
+	  var pointBottomLeft = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : new Point();
 	
 	  _classCallCheck(this, BoundingRect);
 	
@@ -1547,7 +1541,7 @@
 	}
 	
 	function createHexagon() {
-	  var r = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	  var r = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	  var vertices = [];
 	
@@ -1563,8 +1557,8 @@
 	}
 	
 	function createRoundedHexagon() {
-	  var r = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
-	  var cornerRadius = arguments.length <= 1 || arguments[1] === undefined ? animationUtils.HEXAGON_CORNER_RADIUS : arguments[1];
+	  var r = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+	  var cornerRadius = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : animationUtils.HEXAGON_CORNER_RADIUS;
 	
 	  var vertices = [];
 	
@@ -1583,8 +1577,8 @@
 	}
 	
 	function midpointFromPoints() {
-	  var point1 = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
-	  var point2 = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+	  var point1 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+	  var point2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 	
 	  if (!point1 || !point2) {
 	    return new Point(0, 0);
@@ -1595,10 +1589,10 @@
 	}
 	
 	function midpointFromCoords() {
-	  var x1 = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var x2 = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	  var y1 = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
-	  var y2 = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+	  var x1 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	  var x2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	  var y1 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+	  var y2 = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 	
 	  var newX = (x1 + x2) / 2;
 	  var newY = (y1 + y2) / 2;
@@ -1606,8 +1600,8 @@
 	}
 	
 	function distanceFromCoords() {
-	  var point1 = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
-	  var point2 = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+	  var point1 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+	  var point2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 	
 	  if (!point1 || !point2) {
 	    return 0;
@@ -1680,10 +1674,10 @@
 	var CHROME_VERTICAL_PADDING = exports.CHROME_VERTICAL_PADDING = 25;
 	var CHROME_ITEM_WIDTH = exports.CHROME_ITEM_WIDTH = (_imageConst.CANVAS_WIDTH - CHROME_HORIZONTAL_PADDING * 2) / 5;
 	var BACKEND_CHROME_ITEM_WIDTH = exports.BACKEND_CHROME_ITEM_WIDTH = (_imageConst.BACKEND_CANVAS_WIDTH - CHROME_HORIZONTAL_PADDING * 2) / 10;
-	var CHROME_SINGLE_LINE_HEIGHT = exports.CHROME_SINGLE_LINE_HEIGHT = 75 - CHROME_VERTICAL_PADDING * 2;
-	var CHROME_SPACE_BETWEEN_LINES = exports.CHROME_SPACE_BETWEEN_LINES = 12.5;
+	var CHROME_SINGLE_LINE_HEIGHT = exports.CHROME_SINGLE_LINE_HEIGHT = 75 - CHROME_VERTICAL_PADDING * 2; // 25
+	var CHROME_SPACE_BETWEEN_LINES = exports.CHROME_SPACE_BETWEEN_LINES = CHROME_SINGLE_LINE_HEIGHT + CHROME_SINGLE_LINE_HEIGHT / 2; // 37.50 (was 12.5)
 	var CHROME_SHORT_HEIGHT = exports.CHROME_SHORT_HEIGHT = CHROME_SINGLE_LINE_HEIGHT + CHROME_VERTICAL_PADDING * 2;
-	var CHROME_TALL_HEIGHT = exports.CHROME_TALL_HEIGHT = CHROME_SINGLE_LINE_HEIGHT * 2 + CHROME_VERTICAL_PADDING * 2 + CHROME_SPACE_BETWEEN_LINES;
+	var CHROME_TALL_HEIGHT = exports.CHROME_TALL_HEIGHT = CHROME_SINGLE_LINE_HEIGHT * 2 + CHROME_VERTICAL_PADDING * 2 + CHROME_SPACE_BETWEEN_LINES / 2 - CHROME_HEX_RADIUS / 2;
 	
 	var JSON_PATHS = exports.JSON_PATHS = {
 	  REQ: 'req',
@@ -1873,7 +1867,7 @@
 	}
 	
 	function generateTreatments() {
-	  var facesAndEmotions = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	  var facesAndEmotions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 	
 	  var treatments = {};
 	
@@ -1890,7 +1884,7 @@
 	}
 	
 	function setSmoothing() {
-	  var context = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	  var context = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	  if (!context) {
 	    return;
@@ -1900,9 +1894,9 @@
 	}
 	
 	function getSquareColorSample() {
-	  var canvas = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
-	  var dim = arguments.length <= 1 || arguments[1] === undefined ? 3 : arguments[1];
-	  var topLeftPoint = arguments.length <= 2 || arguments[2] === undefined ? new geometryUtils.Point() : arguments[2];
+	  var canvas = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+	  var dim = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3;
+	  var topLeftPoint = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new geometryUtils.Point();
 	
 	  if (!canvas || !dim) {
 	    return;
@@ -1988,13 +1982,13 @@
 	};
 	
 	function subAlpha(color) {
-	  var alpha = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
+	  var alpha = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 	
 	  return color.split(color.split(',')[3])[0] + ' ' + alpha + ')';
 	}
 	
 	function splitRGBA() {
-	  var color = arguments.length <= 0 || arguments[0] === undefined ? 'rgba(255, 255, 255, 1)' : arguments[0];
+	  var color = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'rgba(255, 255, 255, 1)';
 	
 	  var split = {
 	    r: 0,
@@ -2012,7 +2006,7 @@
 	}
 	
 	function chooseRandomColorFromEmotion() {
-	  var emotion = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	  var emotion = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	  var color = null;
 	
@@ -2053,9 +2047,9 @@
 	}
 	
 	function getRandomColorWithAlpha() {
-	  var keyVal = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
-	  var key = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
-	  var val = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+	  var keyVal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+	  var key = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+	  var val = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 	
 	
 	  var keyToUse = key ? key : Object.keys(keyVal)[0];
@@ -2068,8 +2062,8 @@
 	}
 	
 	function generateColorFromIndex() {
-	  var index = arguments.length <= 0 || arguments[0] === undefined ? -1 : arguments[0];
-	  var emotions = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
+	  var index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : -1;
+	  var emotions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
 	
 	  if (emotions.length === 0 || index < 0) {
 	    return TRANSPARENT;
@@ -2080,7 +2074,7 @@
 	}
 	
 	function getEmotionForColor() {
-	  var color = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	  var color = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	  if (!color) {
 	    return null;
@@ -4118,7 +4112,7 @@
 	    value: function flash() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      var thisTimeline = new Timeline({
 	        onComplete: function onComplete() {
@@ -4290,7 +4284,7 @@
 	  }, {
 	    key: 'drawScrim',
 	    value: function drawScrim() {
-	      var callback = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	      if (this.imageElement.scrimAlpha === 0) {
 	        this.imageElement.context.clearRect(0, 0, this.imageElement.canvas.width, this.imageElement.canvas.height);
@@ -4379,7 +4373,7 @@
 	    value: function drawRect(topLeft, width, height) {
 	      var _this2 = this;
 	
-	      var alpha = arguments.length <= 3 || arguments[3] === undefined ? 1 : arguments[3];
+	      var alpha = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
 	
 	      this.imageElement.ifNotDrawing(function () {
 	        _this2.imageElement.context.clearRect(0, 0, _this2.imageElement.canvas.width, _this2.imageElement.canvas.height);
@@ -4420,7 +4414,7 @@
 	  }, {
 	    key: 'setImageScale',
 	    value: function setImageScale() {
-	      var image = arguments.length <= 0 || arguments[0] === undefined ? this.imageElement.image : arguments[0];
+	      var image = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.imageElement.image;
 	
 	      var widthsRatio = this.imageElement.canvas.width / image.width;
 	      var heightsRatio = this.imageElement.canvas.height / image.height;
@@ -4446,7 +4440,7 @@
 	  }, {
 	    key: 'resizeContent',
 	    value: function resizeContent() {
-	      var callback = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	      var scaledMin = animationUtils.MIN_HEX_RADIUS * this.imageElement.canvas.height;
 	      var scaledMax = animationUtils.MAX_HEX_RADIUS * this.imageElement.canvas.height;
@@ -4533,7 +4527,7 @@
 	  }, {
 	    key: 'createHexVertices',
 	    value: function createHexVertices() {
-	      var radius = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var radius = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      return geometryUtils.createRoundedHexagon(radius, radius / 6);
 	    }
@@ -4542,7 +4536,7 @@
 	    value: function cutOutHex() {
 	      var _this4 = this;
 	
-	      var closePath = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
+	      var closePath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 	
 	      this.imageElement.context.save();
 	
@@ -4605,7 +4599,7 @@
 	  }, {
 	    key: 'cutOutCircle',
 	    value: function cutOutCircle() {
-	      var closePath = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
+	      var closePath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 	
 	      var baseRadius = this.getBaseRadius();
 	
@@ -4641,7 +4635,7 @@
 	  }, {
 	    key: 'drawBackgroundWithAlpha',
 	    value: function drawBackgroundWithAlpha() {
-	      var alpha = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var alpha = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      this.imageElement.context.save();
 	
@@ -4655,7 +4649,7 @@
 	  }, {
 	    key: 'drawVignetteWithAlpha',
 	    value: function drawVignetteWithAlpha() {
-	      var alpha = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var alpha = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      this.imageElement.context.save();
 	
@@ -4682,12 +4676,12 @@
 	  }, {
 	    key: 'createSimpleGradient',
 	    value: function createSimpleGradient() {
-	      var centerColor = arguments.length <= 0 || arguments[0] === undefined ? colorUtils.WHITE : arguments[0];
-	      var edgeColor = arguments.length <= 1 || arguments[1] === undefined ? colorUtils.BLACK : arguments[1];
-	      var radiusFactor = arguments.length <= 2 || arguments[2] === undefined ? 1 : arguments[2];
-	      var centered = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
-	      var colorstop1 = arguments.length <= 4 || arguments[4] === undefined ? 0 : arguments[4];
-	      var colorstop2 = arguments.length <= 5 || arguments[5] === undefined ? 1 : arguments[5];
+	      var centerColor = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : colorUtils.WHITE;
+	      var edgeColor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : colorUtils.BLACK;
+	      var radiusFactor = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+	      var centered = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+	      var colorstop1 = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+	      var colorstop2 = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 1;
 	
 	      var x = centered ? this.imageElement.canvas.width / 2 : this.imageElement.eyesMidpoint.x;
 	      var y = centered ? this.imageElement.canvas.height / 2 : this.imageElement.eyesMidpoint.y;
@@ -5031,8 +5025,8 @@
 	    value: function drawPoints() {
 	      var _this2 = this;
 	
-	      var points = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-	      var alpha = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
+	      var points = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+	      var alpha = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 	
 	      if (points.length === 0) {
 	        return;
@@ -5051,7 +5045,7 @@
 	  }, {
 	    key: 'pointToGridCoords',
 	    value: function pointToGridCoords() {
-	      var point = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	      var point = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	      if (!point) {
 	        return new geometryUtils.Point(0, 0);
@@ -5062,8 +5056,8 @@
 	  }, {
 	    key: 'drawPoint',
 	    value: function drawPoint(point) {
-	      var alpha = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
-	      var isLast = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+	      var alpha = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+	      var isLast = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 	
 	      this.imageElement.isDrawing = false;
 	
@@ -5083,8 +5077,8 @@
 	  }, {
 	    key: 'toGridCoords',
 	    value: function toGridCoords() {
-	      var value = arguments.length <= 0 || arguments[0] === undefined ? this.imageElement.canvas.width : arguments[0];
-	      var axis = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+	      var value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.imageElement.canvas.width;
+	      var axis = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 	
 	      var offset = 0;
 	      if (axis === 'x') {
@@ -5129,41 +5123,41 @@
 	exports.exp = exp;
 	exports.expOut = expOut;
 	function linear() {
-	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	  var startVal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	  var endVal = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	  var progress = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	
 	  return startVal + (endVal - startVal) * progress;
 	}
 	
 	function square() {
-	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	  var startVal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	  var endVal = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	  var progress = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	
 	  return startVal + (endVal - startVal) * Math.pow(progress, 2);
 	}
 	
 	function cube() {
-	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	  var startVal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	  var endVal = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	  var progress = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	
 	  return startVal + (endVal - startVal) * Math.pow(progress, 3);
 	}
 	
 	function exp() {
-	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	  var startVal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	  var endVal = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	  var progress = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	
 	  return startVal + (endVal - startVal) * Math.pow(2, 10 * (progress - 1));
 	}
 	
 	function expOut() {
-	  var startVal = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-	  var endVal = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-	  var progress = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+	  var startVal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	  var endVal = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	  var progress = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	
 	  return startVal + (endVal - startVal) * (-1 * Math.pow(2, -10 * progress) + 1);
 	}
@@ -5231,8 +5225,8 @@
 	    value: function zoom() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
-	      var zoomOut = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+	      var zoomOut = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 	
 	      var topLeft = new geometryUtils.Point(utils.thisOrZero(this.imageElement.json[this.imageElement.currFace].boundingPoly.vertices[0].x), utils.thisOrZero(this.imageElement.json[this.imageElement.currFace].boundingPoly.vertices[0].y));
 	
@@ -5288,45 +5282,43 @@
 	          _this.imageElement.isDrawing = false;
 	        });
 	      } else {
-	        (function () {
-	          var tween = Tween.to(_this.canvas, duration, {
-	            onStart: function onStart() {
-	              _this.imageElement.isDrawing = false;
-	              _this.imageElement.tweens.push(tween);
-	            },
-	            onUpdate: function onUpdate() {
-	              var prog = tween.progress();
-	              var currX = _this.imageElement.offsetX - (_this.imageElement.offsetX - targetLeft) * prog;
-	              var currY = _this.imageElement.offsetY - (_this.imageElement.offsetY - targetTop) * prog;
+	        var tween = Tween.to(this.canvas, duration, {
+	          onStart: function onStart() {
+	            _this.imageElement.isDrawing = false;
+	            _this.imageElement.tweens.push(tween);
+	          },
+	          onUpdate: function onUpdate() {
+	            var prog = tween.progress();
+	            var currX = _this.imageElement.offsetX - (_this.imageElement.offsetX - targetLeft) * prog;
+	            var currY = _this.imageElement.offsetY - (_this.imageElement.offsetY - targetTop) * prog;
 	
-	              var currWidth = _this.imageElement.width - (_this.imageElement.width - width) * prog;
-	              var currHeight = _this.imageElement.height - (_this.imageElement.height - height) * prog;
+	            var currWidth = _this.imageElement.width - (_this.imageElement.width - width) * prog;
+	            var currHeight = _this.imageElement.height - (_this.imageElement.height - height) * prog;
 	
-	              _this.context.clearRect(0, 0, _this.canvas.width, _this.canvas.height);
+	            _this.context.clearRect(0, 0, _this.canvas.width, _this.canvas.height);
 	
-	              _this.canvasUtils.fillBackground();
+	            _this.canvasUtils.fillBackground();
 	
-	              _this.context.drawImage(_this.imageElement.image, currX, currY, currWidth, currHeight, 0, 0, _this.canvas.width, _this.canvas.height);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.offsetX = targetLeft;
-	              _this.imageElement.offsetY = targetTop;
-	              _this.imageElement.width = width;
-	              _this.imageElement.height = height;
-	              _this.imageElement.imageScale = width / _this.canvas.width;
-	              if (zoomOut) {
-	                _this.imageElement.eyesMidpoint = _this.pointUtils.pointToGridCoords(_this.imageElement.allEyesCenter);
-	              } else {
-	                _this.imageElement.eyesMidpoint = _this.pointUtils.pointToGridCoords(_this.imageElement.eyeMidpoints[_this.imageElement.currFace]);
-	              }
-	              _this.imageElement.killTween(tween);
-	
-	              _this.imageElement.isDrawing = false;
-	              _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
+	            _this.context.drawImage(_this.imageElement.image, currX, currY, currWidth, currHeight, 0, 0, _this.canvas.width, _this.canvas.height);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.offsetX = targetLeft;
+	            _this.imageElement.offsetY = targetTop;
+	            _this.imageElement.width = width;
+	            _this.imageElement.height = height;
+	            _this.imageElement.imageScale = width / _this.canvas.width;
+	            if (zoomOut) {
+	              _this.imageElement.eyesMidpoint = _this.pointUtils.pointToGridCoords(_this.imageElement.allEyesCenter);
+	            } else {
+	              _this.imageElement.eyesMidpoint = _this.pointUtils.pointToGridCoords(_this.imageElement.eyeMidpoints[_this.imageElement.currFace]);
 	            }
-	          });
-	          _this.imageElement.tweens.push(tween);
-	        })();
+	            _this.imageElement.killTween(tween);
+	
+	            _this.imageElement.isDrawing = false;
+	            _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
+	          }
+	        });
+	        this.imageElement.tweens.push(tween);
 	      }
 	    }
 	  }]);
@@ -5353,7 +5345,7 @@
 	}
 	
 	function randomOrder() {
-	  var inputArr = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+	  var inputArr = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 	
 	  var chosenIndices = [];
 	  var inputLength = inputArr.length;
@@ -5439,42 +5431,42 @@
 	  }, {
 	    key: 'ears',
 	    value: function ears() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.pointUtils.drawPointsWithAnim(this.imageElement.filterLandmarks(faceUtils.LANDMARK_SECTIONS.EARS), duration);
 	    }
 	  }, {
 	    key: 'forehead',
 	    value: function forehead() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.pointUtils.drawPointsWithAnim(this.imageElement.filterLandmarks(faceUtils.LANDMARK_SECTIONS.FOREHEAD), duration);
 	    }
 	  }, {
 	    key: 'nose',
 	    value: function nose() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.pointUtils.drawPointsWithAnim(this.imageElement.filterLandmarks(faceUtils.LANDMARK_SECTIONS.NOSE), duration);
 	    }
 	  }, {
 	    key: 'mouth',
 	    value: function mouth() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.pointUtils.drawPointsWithAnim(this.imageElement.filterLandmarks(faceUtils.LANDMARK_SECTIONS.MOUTH), duration);
 	    }
 	  }, {
 	    key: 'chin',
 	    value: function chin() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.pointUtils.drawPointsWithAnim(this.imageElement.filterLandmarks(faceUtils.LANDMARK_SECTIONS.CHIN), duration);
 	    }
 	  }, {
 	    key: 'eyes',
 	    value: function eyes() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.pointUtils.drawPointsWithAnim(this.imageElement.filterLandmarks(faceUtils.LANDMARK_SECTIONS.EYES), duration);
 	    }
@@ -5483,7 +5475,7 @@
 	    value: function face() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 3 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 3;
 	
 	      var boundingPoly = this.imageElement.json[this.imageElement.currFace].fdBoundingPoly;
 	      var topLeft = boundingPoly.vertices[0];
@@ -5539,7 +5531,7 @@
 	  }, {
 	    key: 'allFeatures',
 	    value: function allFeatures() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      if (!this.imageElementisDrawing) {
 	        this.pointUtils.drawPointsWithAnim(this.imageElement.filterLandmarks(faceUtils.LANDMARK_SECTIONS.FULL), duration);
@@ -5622,7 +5614,7 @@
 	    value: function personalColor() {
 	      var _this2 = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      var fillColors = this.imageElement.treatments.personalAuraColors[this.imageElement.currFace];
 	      this.imageElement.fills = [];
@@ -5636,75 +5628,73 @@
 	        });
 	        this.canvasUtils.redrawCurrentCanvas();
 	      } else {
-	        (function () {
-	          var colorTimeline = new Timeline({
-	            onStart: function onStart() {
-	              _this2.imageElement.timelines.push(colorTimeline);
-	            },
-	            onComplete: function onComplete() {
-	              _this2.imageElement.killTimeline(colorTimeline);
-	            }
-	          });
+	        var colorTimeline = new Timeline({
+	          onStart: function onStart() {
+	            _this2.imageElement.timelines.push(colorTimeline);
+	          },
+	          onComplete: function onComplete() {
+	            _this2.imageElement.killTimeline(colorTimeline);
+	          }
+	        });
 	
-	          var active = null;
-	          var gradient = null;
+	        var active = null;
+	        var gradient = null;
 	
-	          colorTimeline.to(_this2.canvas, duration * 0.75, {
-	            onStart: function onStart() {
-	              active = colorTimeline.getActive()[0];
-	              _this2.imageElement.tweens.push(active);
-	            },
-	            onUpdate: function onUpdate() {
-	              _this2.canvasUtils.redrawCurrentCanvas();
+	        colorTimeline.to(this.canvas, duration * 0.75, {
+	          onStart: function onStart() {
+	            active = colorTimeline.getActive()[0];
+	            _this2.imageElement.tweens.push(active);
+	          },
+	          onUpdate: function onUpdate() {
+	            _this2.canvasUtils.redrawCurrentCanvas();
 	
-	              var progress = active.progress();
-	              var opacity = ease.expOut(0.5, 1, progress);
-	              var radius = ease.expOut(0, 1, progress);
+	            var progress = active.progress();
+	            var opacity = ease.expOut(0.5, 1, progress);
+	            var radius = ease.expOut(0, 1, progress);
 	
-	              gradient = _this2.canvasUtils.createSimpleGradient(fillColors[0], fillColors[1], radius);
+	            gradient = _this2.canvasUtils.createSimpleGradient(fillColors[0], fillColors[1], radius);
 	
-	              _this2.canvasUtils.applyFill({
-	                style: gradient,
-	                comp: 'screen',
-	                alpha: opacity
-	              });
-	            },
-	            onComplete: function onComplete() {
-	              _this2.imageElement.killTween(active);
-	            }
-	          });
-	          colorTimeline.to(_this2.canvas, duration * 0.25, {
-	            onStart: function onStart() {
-	              active = colorTimeline.getActive()[0];
-	              _this2.canvasUtils.redrawCurrentCanvas();
+	            _this2.canvasUtils.applyFill({
+	              style: gradient,
+	              comp: 'screen',
+	              alpha: opacity
+	            });
+	          },
+	          onComplete: function onComplete() {
+	            _this2.imageElement.killTween(active);
+	          }
+	        });
+	        colorTimeline.to(this.canvas, duration * 0.25, {
+	          onStart: function onStart() {
+	            active = colorTimeline.getActive()[0];
+	            _this2.canvasUtils.redrawCurrentCanvas();
 	
-	              _this2.canvasUtils.applyFill({
-	                style: gradient,
-	                comp: 'screen',
-	                alpha: 1
-	              });
+	            _this2.canvasUtils.applyFill({
+	              style: gradient,
+	              comp: 'screen',
+	              alpha: 1
+	            });
 	
-	              _this2.imageElement.tweens.push(active);
-	            },
-	            onUpdate: function onUpdate() {
-	              var progress = active.progress();
-	              var opacity = ease.square(1, 0, progress);
+	            _this2.imageElement.tweens.push(active);
+	          },
+	          onUpdate: function onUpdate() {
+	            var progress = active.progress();
+	            var opacity = ease.square(1, 0, progress);
 	
-	              _this2.canvasUtils.redrawCurrentCanvas();
+	            _this2.canvasUtils.redrawCurrentCanvas();
 	
-	              _this2.canvasUtils.applyFill({
-	                style: gradient,
-	                comp: 'screen',
-	                alpha: opacity
-	              });
-	            },
-	            onComplete: function onComplete() {
-	              _this2.canvasUtils.redrawCurrentCanvas();
-	              _this2.imageElement.isDrawing = false;
-	              _this2.imageElement.killTween(active);
-	            }
-	          });
-	        })();
+	            _this2.canvasUtils.applyFill({
+	              style: gradient,
+	              comp: 'screen',
+	              alpha: opacity
+	            });
+	          },
+	          onComplete: function onComplete() {
+	            _this2.canvasUtils.redrawCurrentCanvas();
+	            _this2.imageElement.isDrawing = false;
+	            _this2.imageElement.killTween(active);
+	          }
+	        });
 	      }
 	    }
 	  }]);
@@ -5781,8 +5771,8 @@
 	  }, {
 	    key: 'fillInFeatheredCircle',
 	    value: function fillInFeatheredCircle(pattern, radius, feather) {
-	      var reverse = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
-	      var centered = arguments.length <= 4 || arguments[4] === undefined ? false : arguments[4];
+	      var reverse = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+	      var centered = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
 	
 	      var tempCanvas = this.canvasUtils.createHiDPICanvas();
 	      tempCanvas.width = this.canvas.width;
@@ -5812,10 +5802,10 @@
 	  }, {
 	    key: 'animateInMultiAuraFrame',
 	    value: function animateInMultiAuraFrame() {
-	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
-	      var startR = arguments.length <= 1 || arguments[1] === undefined ? this.canvas.width : arguments[1];
-	      var fill = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
-	      var comp = arguments.length <= 3 || arguments[3] === undefined ? animationUtils.BLEND_NORMAL : arguments[3];
+	      var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+	      var startR = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.canvas.width;
+	      var fill = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+	      var comp = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : animationUtils.BLEND_NORMAL;
 	
 	      if (!fill) {
 	        return;
@@ -5869,7 +5859,7 @@
 	    value: function animateInMultiAura() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      var fill = null;
 	      var comp = this.imageElement.treatments.groupAuraColors.length > 0 ? 'screen' : 'lighten';
@@ -5880,36 +5870,34 @@
 	          _this.animateInMultiAuraFrame(1, _this.canvas.width, _this.getMultiAuraFill(), comp);
 	        });
 	      } else {
-	        (function () {
-	          var active = null;
+	        var active = null;
 	
-	          var auraTimeline = new Timeline({
-	            onStart: function onStart() {
-	              _this.imageElement.timelines.push(auraTimeline);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTimeline(auraTimeline);
-	            }
-	          });
-	          auraTimeline.to(_this.canvas, duration, {
-	            onStart: function onStart() {
-	              active = auraTimeline.getActive()[0];
-	              fill = _this.getMultiAuraFill();
-	              _this.imageElement.fills = [fill];
-	              _this.imageElement.isDrawing = false;
-	              _this.imageElement.tweens.push(active);
-	            },
-	            onUpdate: function onUpdate() {
-	              var progress = active.progress();
-	              var r = ease.exp(startR, _this.canvas.width, progress);
+	        var auraTimeline = new Timeline({
+	          onStart: function onStart() {
+	            _this.imageElement.timelines.push(auraTimeline);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTimeline(auraTimeline);
+	          }
+	        });
+	        auraTimeline.to(this.canvas, duration, {
+	          onStart: function onStart() {
+	            active = auraTimeline.getActive()[0];
+	            fill = _this.getMultiAuraFill();
+	            _this.imageElement.fills = [fill];
+	            _this.imageElement.isDrawing = false;
+	            _this.imageElement.tweens.push(active);
+	          },
+	          onUpdate: function onUpdate() {
+	            var progress = active.progress();
+	            var r = ease.exp(startR, _this.canvas.width, progress);
 	
-	              _this.animateInMultiAuraFrame(progress, r, _this.imageElement.fills[0], comp);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTween(active);
-	            }
-	          });
-	        })();
+	            _this.animateInMultiAuraFrame(progress, r, _this.imageElement.fills[0], comp);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTween(active);
+	          }
+	        });
 	      }
 	    }
 	  }, {
@@ -6075,8 +6063,8 @@
 	    value: function animateInBackgroundFrame() {
 	      var _this = this;
 	
-	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
-	      var hexRadius = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
+	      var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+	      var hexRadius = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 	
 	      this.canvasUtils.redrawBaseImage();
 	
@@ -6139,7 +6127,7 @@
 	    value: function animateInBackground() {
 	      var _this2 = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      var rEnd = this.imageElement.canvas.width;
 	
@@ -6148,37 +6136,35 @@
 	          _this2.animateInBackgroundFrame(1, rEnd);
 	        });
 	      } else {
-	        (function () {
-	          var active = null;
-	          var backgroundTimeline = new Timeline({
-	            onStart: function onStart() {
-	              _this2.imageElement.timelines.push(backgroundTimeline);
-	            },
-	            onComplete: function onComplete() {
-	              _this2.imageElement.killTimeline(backgroundTimeline);
-	              _this2.imageElement.context.restore();
-	            }
-	          });
+	        var active = null;
+	        var backgroundTimeline = new Timeline({
+	          onStart: function onStart() {
+	            _this2.imageElement.timelines.push(backgroundTimeline);
+	          },
+	          onComplete: function onComplete() {
+	            _this2.imageElement.killTimeline(backgroundTimeline);
+	            _this2.imageElement.context.restore();
+	          }
+	        });
 	
-	          var rStart = _this2.imageElement.hexR;
-	          var progress = 0;
-	          var currR = rStart;
+	        var rStart = this.imageElement.hexR;
+	        var progress = 0;
+	        var currR = rStart;
 	
-	          backgroundTimeline.to(_this2.imageElement.canvas, duration, {
-	            onStart: function onStart() {
-	              active = backgroundTimeline.getActive()[0];
-	              _this2.imageElement.tweens.push(active);
-	            },
-	            onUpdate: function onUpdate() {
-	              progress = active.progress();
-	              currR = ease.exp(rStart, rEnd, progress);
-	              _this2.animateInBackgroundFrame(progress, currR);
-	            },
-	            onComplete: function onComplete() {
-	              _this2.imageElement.killTween(active);
-	            }
-	          });
-	        })();
+	        backgroundTimeline.to(this.imageElement.canvas, duration, {
+	          onStart: function onStart() {
+	            active = backgroundTimeline.getActive()[0];
+	            _this2.imageElement.tweens.push(active);
+	          },
+	          onUpdate: function onUpdate() {
+	            progress = active.progress();
+	            currR = ease.exp(rStart, rEnd, progress);
+	            _this2.animateInBackgroundFrame(progress, currR);
+	          },
+	          onComplete: function onComplete() {
+	            _this2.imageElement.killTween(active);
+	          }
+	        });
 	      }
 	    }
 	  }]);
@@ -6248,7 +6234,7 @@
 	  }, {
 	    key: 'drawVignetteWithAlpha',
 	    value: function drawVignetteWithAlpha() {
-	      var alpha = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var alpha = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      this.context.save();
 	
@@ -6261,7 +6247,7 @@
 	  }, {
 	    key: 'animateInVignetteFrame',
 	    value: function animateInVignetteFrame() {
-	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      if (this.imageElement.treatments.treatment.noEmotionScrim) {
 	        this.canvasUtils.redrawBaseImage();
@@ -6285,7 +6271,7 @@
 	    value: function animateInVignette() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      if (!this.imageElement.treatments.treatment.noEmotionScrim) {
 	
@@ -6311,34 +6297,32 @@
 	          _this.animateInVignetteFrame(1);
 	        });
 	      } else {
-	        (function () {
-	          var active = null;
-	          var progress = 0;
+	        var active = null;
+	        var progress = 0;
 	
-	          var vignetteTimeline = new Timeline({
-	            onStart: function onStart() {
-	              _this.imageElement.timelines.push(vignetteTimeline);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTimeline(vignetteTimeline);
-	              _this.context.restore();
-	            }
-	          });
+	        var vignetteTimeline = new Timeline({
+	          onStart: function onStart() {
+	            _this.imageElement.timelines.push(vignetteTimeline);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTimeline(vignetteTimeline);
+	            _this.context.restore();
+	          }
+	        });
 	
-	          vignetteTimeline.to(_this.canvas, duration, {
-	            onStart: function onStart() {
-	              active = vignetteTimeline.getActive()[0];
-	              _this.imageElement.tweens.push(active);
-	            },
-	            onUpdate: function onUpdate() {
-	              progress = active.progress();
-	              _this.animateInVignetteFrame(progress);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTween(active);
-	            }
-	          });
-	        })();
+	        vignetteTimeline.to(this.canvas, duration, {
+	          onStart: function onStart() {
+	            active = vignetteTimeline.getActive()[0];
+	            _this.imageElement.tweens.push(active);
+	          },
+	          onUpdate: function onUpdate() {
+	            progress = active.progress();
+	            _this.animateInVignetteFrame(progress);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTween(active);
+	          }
+	        });
 	      }
 	    }
 	  }]);
@@ -6405,7 +6389,7 @@
 	  }, {
 	    key: 'animateInHaloFrame',
 	    value: function animateInHaloFrame() {
-	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      if (this.imageElement.treatments.treatment.noEmotionScrim) {
 	        this.canvasUtils.redrawBaseImage();
@@ -6472,7 +6456,7 @@
 	    value: function animateInHalo() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      if (duration === 0) {
 	        if (!this.imageElement.treatments.treatment.noEmotionScrim) {
@@ -6481,38 +6465,36 @@
 	          });
 	        }
 	      } else {
-	        (function () {
-	          var active = null;
-	          var progress = 0;
+	        var active = null;
+	        var progress = 0;
 	
-	          var haloTimeline = new Timeline({
-	            onStart: function onStart() {
-	              _this.imageElement.timelines.push(haloTimeline);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTimeline(haloTimeline);
-	              _this.context.restore();
-	            }
-	          });
+	        var haloTimeline = new Timeline({
+	          onStart: function onStart() {
+	            _this.imageElement.timelines.push(haloTimeline);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTimeline(haloTimeline);
+	            _this.context.restore();
+	          }
+	        });
 	
-	          haloTimeline.to(_this.canvas, duration, {
-	            onStart: function onStart() {
-	              _this.context.save();
-	              active = haloTimeline.getActive()[0];
-	              _this.imageElement.tweens.push(active);
-	              _this.context.restore();
-	            },
-	            onUpdate: function onUpdate() {
-	              if (!_this.imageElement.treatments.treatment.noEmotionScrim) {
-	                progress = active.progress();
-	                _this.animateInHaloFrame(progress, _this.imageElement.treatments.treatment.halo.radius);
-	              }
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTween(active);
+	        haloTimeline.to(this.canvas, duration, {
+	          onStart: function onStart() {
+	            _this.context.save();
+	            active = haloTimeline.getActive()[0];
+	            _this.imageElement.tweens.push(active);
+	            _this.context.restore();
+	          },
+	          onUpdate: function onUpdate() {
+	            if (!_this.imageElement.treatments.treatment.noEmotionScrim) {
+	              progress = active.progress();
+	              _this.animateInHaloFrame(progress, _this.imageElement.treatments.treatment.halo.radius);
 	            }
-	          });
-	        })();
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTween(active);
+	          }
+	        });
 	      }
 	    }
 	  }]);
@@ -6600,7 +6582,7 @@
 	  }, {
 	    key: 'chrome',
 	    value: function chrome() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 2 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
 	
 	      this.imageElement.finalImage = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
 	      this.drawChrome(duration);
@@ -6608,9 +6590,9 @@
 	  }, {
 	    key: 'drawChromeFrame',
 	    value: function drawChromeFrame() {
-	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
-	      var height = arguments.length <= 1 || arguments[1] === undefined ? 112 : arguments[1];
-	      var callback = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+	      var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+	      var height = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 112;
+	      var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 	
 	      this.context.globalCompositeOperation = 'source-over';
 	      this.context.fillStyle = 'rgba(255, 255, 255, ' + progress + ')';
@@ -6625,7 +6607,7 @@
 	    value: function drawChrome() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 2 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
 	
 	      var height = 0;
 	      if (single) {
@@ -6655,73 +6637,71 @@
 	          }
 	        });
 	      } else {
-	        (function () {
-	          var timeline = new Timeline({
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTimeline(timeline);
-	            }
-	          });
-	          var currActive = null;
-	          var tick = -1;
-	          _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
-	          _this.canvasUtils.redrawCurrentCanvas();
-	          if (_this.imageElement.totalEmotions > 0) {
-	            timeline.to(_this, animationUtils.EMOTION_HEX_FADE_DURATION / _this.imageElement.timeFactor, {
-	              onStart: function onStart() {
-	                currActive = timeline.getActive()[0];
-	                _this.imageElement.tweens.push(currActive);
-	              },
-	              onUpdate: function onUpdate() {
-	                var progress = currActive.progress();
-	                _this.drawChromeFrame(progress, height);
-	              },
-	              onComplete: function onComplete() {
-	                _this.imageElement.killTween(currActive);
-	              }
-	            });
-	
-	            _this.imageElement.facesAndEmotions.forEach(function (person) {
-	              var _loop = function _loop(emotion) {
-	                timeline.to(_this, animationUtils.EMOTION_HEX_FADE_DURATION / _this.imageElement.timeFactor, {
-	                  onStart: function onStart() {
-	                    currActive = timeline.getActive()[0];
-	                    _this.imageElement.tweens.push(currActive);
-	                    tick++;
-	                    _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
-	                  },
-	                  onUpdate: function onUpdate() {
-	                    _this.canvasUtils.redrawCurrentCanvas();
-	                    _this.drawChromeHex(height, emotion, person[emotion], tick, currActive.progress());
-	                  },
-	                  onComplete: function onComplete() {
-	                    _this.canvasUtils.redrawCurrentCanvas();
-	                    _this.drawChromeHex(height, emotion, person[emotion], tick, 1);
-	                    _this.imageElement.killTween(currActive);
-	                    _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
-	                  }
-	                });
-	              };
-	
-	              for (var emotion in person) {
-	                _loop(emotion);
-	              }
-	            });
+	        var timeline = new Timeline({
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTimeline(timeline);
 	          }
-	          timeline.to(_this, animationUtils.EMOTION_HEX_FADE_DURATION / _this.imageElement.timeFactor, {
+	        });
+	        var currActive = null;
+	        var tick = -1;
+	        this.imageElement.canvasSnapshot = this.context.createPattern(this.canvas, 'no-repeat');
+	        this.canvasUtils.redrawCurrentCanvas();
+	        if (this.imageElement.totalEmotions > 0) {
+	          timeline.to(this, animationUtils.EMOTION_HEX_FADE_DURATION / this.imageElement.timeFactor, {
 	            onStart: function onStart() {
 	              currActive = timeline.getActive()[0];
+	              _this.imageElement.tweens.push(currActive);
 	            },
 	            onUpdate: function onUpdate() {
-	              _this.canvasUtils.redrawCurrentCanvas();
-	              _this.context.globalCompositeOperation = 'overlay';
-	              _this.context.globalAlpha = ease.exp(0, 1, currActive.progress());
-	              _this.context.drawImage(_this.logo, _this.logoLeft, _this.logoTop, _this.logoWidth, _this.logoHeight);
-	              _this.context.globalCompositeOperation = 'source-over';
+	              var progress = currActive.progress();
+	              _this.drawChromeFrame(progress, height);
+	            },
+	            onComplete: function onComplete() {
+	              _this.imageElement.killTween(currActive);
 	            }
 	          });
 	
-	          _this.imageElement.timelines.push(timeline);
-	        })();
+	          this.imageElement.facesAndEmotions.forEach(function (person) {
+	            var _loop = function _loop(emotion) {
+	              timeline.to(_this, animationUtils.EMOTION_HEX_FADE_DURATION / _this.imageElement.timeFactor, {
+	                onStart: function onStart() {
+	                  currActive = timeline.getActive()[0];
+	                  _this.imageElement.tweens.push(currActive);
+	                  tick++;
+	                  _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
+	                },
+	                onUpdate: function onUpdate() {
+	                  _this.canvasUtils.redrawCurrentCanvas();
+	                  _this.drawChromeHex(height, emotion, person[emotion], tick, currActive.progress());
+	                },
+	                onComplete: function onComplete() {
+	                  _this.canvasUtils.redrawCurrentCanvas();
+	                  _this.drawChromeHex(height, emotion, person[emotion], tick, 1);
+	                  _this.imageElement.killTween(currActive);
+	                  _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
+	                }
+	              });
+	            };
+	
+	            for (var emotion in person) {
+	              _loop(emotion);
+	            }
+	          });
+	        }
+	        timeline.to(this, animationUtils.EMOTION_HEX_FADE_DURATION / this.imageElement.timeFactor, {
+	          onStart: function onStart() {
+	            currActive = timeline.getActive()[0];
+	          },
+	          onUpdate: function onUpdate() {
+	            _this.canvasUtils.redrawCurrentCanvas();
+	            _this.context.globalCompositeOperation = 'overlay';
+	            _this.context.globalAlpha = ease.exp(0, 1, currActive.progress());
+	            _this.context.drawImage(_this.logo, _this.logoLeft, _this.logoTop, _this.logoWidth, _this.logoHeight);
+	            _this.context.globalCompositeOperation = 'source-over';
+	          }
+	        });
+	
+	        this.imageElement.timelines.push(timeline);
 	      }
 	    }
 	  }, {
@@ -6729,7 +6709,7 @@
 	    value: function drawChromeHex(height, emotion, strength, num, progress) {
 	      var _this2 = this;
 	
-	      var radius = arguments.length <= 5 || arguments[5] === undefined ? animationUtils.CHROME_HEX_RADIUS : arguments[5];
+	      var radius = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : animationUtils.CHROME_HEX_RADIUS;
 	
 	      if (num >= animationUtils.CHROME_MAX_ITEMS) {
 	        return;
@@ -6921,13 +6901,13 @@
 	  _inherits(ImageElement, _PanelComponent);
 	
 	  function ImageElement() {
-	    var imgPath = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
-	    var jsonPath = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
-	    var readyCallback = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+	    var imgPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+	    var jsonPath = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+	    var readyCallback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 	
 	    _classCallCheck(this, ImageElement);
 	
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ImageElement).call(this));
+	    var _this = _possibleConstructorReturn(this, (ImageElement.__proto__ || Object.getPrototypeOf(ImageElement)).call(this));
 	
 	    _this.canvasWidth = single ? imageConst.BACKEND_CANVAS_WIDTH : imageConst.CANVAS_WIDTH;
 	    _this.canvasHeight = single ? imageConst.BACKEND_CANVAS_HEIGHT : imageConst.CANVAS_HEIGHT;
@@ -7034,7 +7014,7 @@
 	        this.zoom(0, true);
 	        this.startAuraAnimations();
 	      } else {
-	        _get(Object.getPrototypeOf(ImageElement.prototype), 'startAnimations', this).call(this, function () {
+	        _get(ImageElement.prototype.__proto__ || Object.getPrototypeOf(ImageElement.prototype), 'startAnimations', this).call(this, function () {
 	          _this2.startAuraAnimations();
 	        });
 	      }
@@ -7046,7 +7026,7 @@
 	
 	      this.auraAnimations = new Timeline({
 	        onComplete: function onComplete() {
-	          _get(Object.getPrototypeOf(ImageElement.prototype), 'killTimeline', _this3).call(_this3, _this3.auraAnimations);
+	          _get(ImageElement.prototype.__proto__ || Object.getPrototypeOf(ImageElement.prototype), 'killTimeline', _this3).call(_this3, _this3.auraAnimations);
 	        }
 	      });
 	
@@ -7071,7 +7051,7 @@
 	    value: function reinitFaces(json) {
 	      var _this4 = this;
 	
-	      _get(Object.getPrototypeOf(ImageElement.prototype), 'reinitFaces', this).call(this, json, function () {
+	      _get(ImageElement.prototype.__proto__ || Object.getPrototypeOf(ImageElement.prototype), 'reinitFaces', this).call(this, json, function () {
 	        if (_this4.particles) {
 	          _this4.particles.kill();
 	          _this4.particles = null;
@@ -7136,14 +7116,14 @@
 	  }, {
 	    key: 'flash',
 	    value: function flash() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.flashStep = new _flashStep2.default(this, this.canvas, this.context, duration);
 	    }
 	  }, {
 	    key: 'zoom',
 	    value: function zoom() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	      var zoomOut = arguments[1];
 	
 	      this.zoomStep.zoom(duration, zoomOut);
@@ -7151,77 +7131,77 @@
 	  }, {
 	    key: 'face',
 	    value: function face() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.face(duration);
 	    }
 	  }, {
 	    key: 'forehead',
 	    value: function forehead() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.forehead(duration);
 	    }
 	  }, {
 	    key: 'eyes',
 	    value: function eyes() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.eyes(duration);
 	    }
 	  }, {
 	    key: 'ears',
 	    value: function ears() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.ears(duration);
 	    }
 	  }, {
 	    key: 'nose',
 	    value: function nose() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.nose(duration);
 	    }
 	  }, {
 	    key: 'mouth',
 	    value: function mouth() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.mouth(duration);
 	    }
 	  }, {
 	    key: 'chin',
 	    value: function chin() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.chin(duration);
 	    }
 	  }, {
 	    key: 'allFeatures',
 	    value: function allFeatures() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.faceStep.allFeatures(duration);
 	    }
 	  }, {
 	    key: 'zoomOut',
 	    value: function zoomOut() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.zoomStep.zoom(duration, true);
 	    }
 	  }, {
 	    key: 'emotion',
 	    value: function emotion() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.emotionStep = new _emotionStep2.default(this, this.canvas, this.context, duration);
 	    }
 	  }, {
 	    key: 'animateInBackground',
 	    value: function animateInBackground() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      if (this.facesAndEmotions.length !== 1) {
 	        this.groupCircleStep = new _groupCircleStep2.default(this, this.canvas, this.context, duration);
@@ -7232,7 +7212,7 @@
 	  }, {
 	    key: 'animateInHalo',
 	    value: function animateInHalo() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.haloStep = new _haloStep2.default(this, this.canvas, this.context, duration);
 	      this.showParticles();
@@ -7240,7 +7220,7 @@
 	  }, {
 	    key: 'animateInHaloMulti',
 	    value: function animateInHaloMulti() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.multiAuraStep = new _multiAuraStep2.default(this, this.canvas, this.context, duration);
 	      this.showParticles();
@@ -7264,7 +7244,7 @@
 	  }, {
 	    key: 'chrome',
 	    value: function chrome() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.chromeStep = new _chromeStep2.default(this, this.canvas, this.context, duration);
 	    }
@@ -7333,13 +7313,13 @@
 	  }, {
 	    key: 'animateInBackgroundFrame',
 	    value: function animateInBackgroundFrame() {
-	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      this.context.save();
 	
 	      this.canvasUtils.redrawBaseImage();
 	
-	      this.canvasUtils.createShapeBackground(progress * 0.75);
+	      this.canvasUtils.createShapeBackground(progress);
 	
 	      if (!this.circleStarted && progress !== 1) {
 	        this.circleStarted = true;
@@ -7357,7 +7337,7 @@
 	    value: function animateInBackground() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      var rEnd = this.canvas.width;
 	
@@ -7366,37 +7346,35 @@
 	          _this.animateInBackgroundFrame(1, rEnd);
 	        });
 	      } else {
-	        (function () {
-	          var active = null;
-	          var backgroundTimeline = new Timeline({
-	            onStart: function onStart() {
-	              _this.imageElement.timelines.push(backgroundTimeline);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTimeline(backgroundTimeline);
-	              _this.context.restore();
-	            }
-	          });
+	        var active = null;
+	        var backgroundTimeline = new Timeline({
+	          onStart: function onStart() {
+	            _this.imageElement.timelines.push(backgroundTimeline);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTimeline(backgroundTimeline);
+	            _this.context.restore();
+	          }
+	        });
 	
-	          var rStart = _this.imageElement.hexR;
-	          var progress = 0;
-	          var currR = rStart;
+	        var rStart = this.imageElement.hexR;
+	        var progress = 0;
+	        var currR = rStart;
 	
-	          backgroundTimeline.to(_this.canvas, duration, {
-	            onStart: function onStart() {
-	              active = backgroundTimeline.getActive()[0];
-	              _this.imageElement.tweens.push(active);
-	            },
-	            onUpdate: function onUpdate() {
-	              progress = active.progress();
-	              currR = ease.exp(rStart, rEnd, progress);
-	              _this.animateInBackgroundFrame(progress, currR);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTween(active);
-	            }
-	          });
-	        })();
+	        backgroundTimeline.to(this.canvas, duration, {
+	          onStart: function onStart() {
+	            active = backgroundTimeline.getActive()[0];
+	            _this.imageElement.tweens.push(active);
+	          },
+	          onUpdate: function onUpdate() {
+	            progress = active.progress();
+	            currR = ease.exp(rStart, rEnd, progress);
+	            _this.animateInBackgroundFrame(progress, currR);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTween(active);
+	          }
+	        });
 	      }
 	    }
 	  }]);
@@ -7465,7 +7443,7 @@
 	  }, {
 	    key: 'animateInHaloFrame',
 	    value: function animateInHaloFrame() {
-	      var prg = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var prg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      var progress = prg / 2;
 	      var group = this.imageElement.facesAndEmotions.length !== 1;
@@ -7541,7 +7519,7 @@
 	    value: function animateInHalo() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      var group = this.imageElement.facesAndEmotions.length !== 1;
 	
@@ -7550,46 +7528,44 @@
 	          _this.animateInHaloFrame();
 	        });
 	      } else {
-	        (function () {
-	          var active = null;
-	          var progress = 0;
+	        var active = null;
+	        var progress = 0;
 	
-	          var haloTimeline = new Timeline({
-	            onStart: function onStart() {
-	              _this.imageElement.timelines.push(haloTimeline);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTimeline(haloTimeline);
-	              _this.context.restore();
-	              _this.imageElement.allDone = true;
-	            }
-	          });
+	        var haloTimeline = new Timeline({
+	          onStart: function onStart() {
+	            _this.imageElement.timelines.push(haloTimeline);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTimeline(haloTimeline);
+	            _this.context.restore();
+	            _this.imageElement.allDone = true;
+	          }
+	        });
 	
-	          haloTimeline.to(_this.canvas, duration, {
-	            onStart: function onStart() {
-	              _this.context.save();
-	              active = haloTimeline.getActive()[0];
-	              _this.imageElement.tweens.push(active);
-	              _this.context.restore();
-	            },
-	            onUpdate: function onUpdate() {
-	              progress = active.progress();
-	              if (!group) {
-	                if (!_this.imageElement.treatments.treatment.noEmotionScrim) {
-	                  _this.animateInHaloFrame(progress, _this.imageElement.treatments.treatment.halo.radius);
-	                } else {
-	                  _this.animateInHaloFrame(progress);
-	                }
+	        haloTimeline.to(this.canvas, duration, {
+	          onStart: function onStart() {
+	            _this.context.save();
+	            active = haloTimeline.getActive()[0];
+	            _this.imageElement.tweens.push(active);
+	            _this.context.restore();
+	          },
+	          onUpdate: function onUpdate() {
+	            progress = active.progress();
+	            if (!group) {
+	              if (!_this.imageElement.treatments.treatment.noEmotionScrim) {
+	                _this.animateInHaloFrame(progress, _this.imageElement.treatments.treatment.halo.radius);
 	              } else {
 	                _this.animateInHaloFrame(progress);
 	              }
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
-	              _this.imageElement.killTween(active);
+	            } else {
+	              _this.animateInHaloFrame(progress);
 	            }
-	          });
-	        })();
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
+	            _this.imageElement.killTween(active);
+	          }
+	        });
 	      }
 	    }
 	  }]);
@@ -7678,7 +7654,7 @@
 	  }, {
 	    key: 'chrome',
 	    value: function chrome() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 2 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
 	
 	      this.particles = new _particles2.default(this.imageElement, this.canvas, this.context);
 	      this.drawChrome(duration);
@@ -7699,9 +7675,9 @@
 	  }, {
 	    key: 'drawChromeFrame',
 	    value: function drawChromeFrame() {
-	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
-	      var height = arguments.length <= 1 || arguments[1] === undefined ? 112 : arguments[1];
-	      var callback = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+	      var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+	      var height = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 112;
+	      var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 	
 	      this.context.save();
 	      this.context.globalCompositeOperation = 'source-over';
@@ -7718,7 +7694,7 @@
 	    value: function drawChrome() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 2 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
 	
 	      if (this.killAnimation) {
 	        return;
@@ -7753,73 +7729,71 @@
 	          _this.context.drawImage(_this.logo, _this.logoLeft, _this.logoTop, single ? _this.logoWidth * 1.5 : _this.logoWidth, single ? _this.logoHeight * 1.5 : _this.logoHeight);
 	        });
 	      } else {
-	        (function () {
-	          var timeline = new Timeline({
+	        var timeline = new Timeline({
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTimeline(timeline);
+	          }
+	        });
+	        var currActive = null;
+	        if (this.imageElement.totalEmotions > 0) {
+	          timeline.to(this, duration, {
+	            onStart: function onStart() {
+	              currActive = timeline.getActive()[0];
+	              _this.imageElement.tweens.push(currActive);
+	            },
+	            onUpdate: function onUpdate() {
+	              var progress = currActive.progress();
+	              _this.canvasUtils.redrawCurrentCanvas();
+	              _this.drawChromeFrame(progress, height);
+	
+	              _this.context.globalAlpha = ease.exp(0, 1, currActive.progress());
+	
+	              _this.particles.drawParticles();
+	
+	              _this.context.drawImage(_this.logo, _this.logoLeft, _this.logoTop, _this.logoWidth, _this.logoHeight);
+	
+	              var tick = -1;
+	
+	              _this.imageElement.facesAndEmotions.forEach(function (person) {
+	                for (var emotion in person) {
+	                  tick++;
+	                  // animationUtils.EMOTION_HEX_FADE_DURATION / this.imageElement.timeFactor
+	                  _this.drawChromeHex(height, emotion, person[emotion], tick, currActive.progress());
+	                }
+	              });
+	            },
 	            onComplete: function onComplete() {
-	              _this.imageElement.killTimeline(timeline);
+	              _this.imageElement.killTween(currActive);
+	              setTimeout(function () {
+	                _this.drawParticles();
+	              }, 100);
 	            }
 	          });
-	          var currActive = null;
-	          if (_this.imageElement.totalEmotions > 0) {
-	            timeline.to(_this, duration, {
-	              onStart: function onStart() {
-	                currActive = timeline.getActive()[0];
-	                _this.imageElement.tweens.push(currActive);
-	              },
-	              onUpdate: function onUpdate() {
-	                var progress = currActive.progress();
-	                _this.canvasUtils.redrawCurrentCanvas();
-	                _this.drawChromeFrame(progress, height);
+	        } else {
+	          timeline.to(this, duration, {
+	            onStart: function onStart() {
+	              currActive = timeline.getActive()[0];
+	              _this.imageElement.tweens.push(currActive);
+	            },
+	            onUpdate: function onUpdate() {
+	              _this.canvasUtils.redrawCurrentCanvas();
+	              _this.context.globalAlpha = ease.exp(0, 1, currActive.progress());
+	              _this.particles.drawParticles();
+	            },
+	            onComplete: function onComplete() {
+	              _this.imageElement.killTween(currActive);
+	              _this.drawParticles();
+	            }
+	          });
+	        }
 	
-	                _this.context.globalAlpha = ease.exp(0, 1, currActive.progress());
-	
-	                _this.particles.drawParticles();
-	
-	                _this.context.drawImage(_this.logo, _this.logoLeft, _this.logoTop, _this.logoWidth, _this.logoHeight);
-	
-	                var tick = -1;
-	
-	                _this.imageElement.facesAndEmotions.forEach(function (person) {
-	                  for (var emotion in person) {
-	                    tick++;
-	                    // animationUtils.EMOTION_HEX_FADE_DURATION / this.imageElement.timeFactor
-	                    _this.drawChromeHex(height, emotion, person[emotion], tick, currActive.progress());
-	                  }
-	                });
-	              },
-	              onComplete: function onComplete() {
-	                _this.imageElement.killTween(currActive);
-	                setTimeout(function () {
-	                  _this.drawParticles();
-	                }, 100);
-	              }
-	            });
-	          } else {
-	            timeline.to(_this, duration, {
-	              onStart: function onStart() {
-	                currActive = timeline.getActive()[0];
-	                _this.imageElement.tweens.push(currActive);
-	              },
-	              onUpdate: function onUpdate() {
-	                _this.canvasUtils.redrawCurrentCanvas();
-	                _this.context.globalAlpha = ease.exp(0, 1, currActive.progress());
-	                _this.particles.drawParticles();
-	              },
-	              onComplete: function onComplete() {
-	                _this.imageElement.killTween(currActive);
-	                _this.drawParticles();
-	              }
-	            });
-	          }
-	
-	          _this.imageElement.timelines.push(timeline);
-	        })();
+	        this.imageElement.timelines.push(timeline);
 	      }
 	    }
 	  }, {
 	    key: 'drawChromeHex',
 	    value: function drawChromeHex(height, emotion, strength, num, progress) {
-	      var radius = arguments.length <= 5 || arguments[5] === undefined ? animationUtils.CHROME_HEX_RADIUS : arguments[5];
+	      var radius = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : animationUtils.CHROME_HEX_RADIUS;
 	
 	      if (num >= animationUtils.CHROME_MAX_ITEMS) {
 	        return;
@@ -8080,7 +8054,7 @@
 	  }, {
 	    key: 'animateInCircleFrame',
 	    value: function animateInCircleFrame() {
-	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      this.canvasUtils.redrawBaseImage();
 	      if (!this.circleStarted && progress !== 1) {
@@ -8097,41 +8071,39 @@
 	    value: function animateInCircle() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      if (duration === 0) {
 	        this.imageElement.ifNotDrawing(function () {
 	          _this.animateInCircleFrame(1);
 	        });
 	      } else {
-	        (function () {
-	          var active = null;
-	          var backgroundTimeline = new Timeline({
-	            onStart: function onStart() {
-	              _this.imageElement.timelines.push(backgroundTimeline);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTimeline(backgroundTimeline);
-	              _this.context.restore();
-	            }
-	          });
+	        var active = null;
+	        var backgroundTimeline = new Timeline({
+	          onStart: function onStart() {
+	            _this.imageElement.timelines.push(backgroundTimeline);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTimeline(backgroundTimeline);
+	            _this.context.restore();
+	          }
+	        });
 	
-	          var progress = 0;
+	        var progress = 0;
 	
-	          backgroundTimeline.to(_this.canvas, duration, {
-	            onStart: function onStart() {
-	              active = backgroundTimeline.getActive()[0];
-	              _this.imageElement.tweens.push(active);
-	            },
-	            onUpdate: function onUpdate() {
-	              progress = active.progress();
-	              _this.animateInCircleFrame(progress);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTween(active);
-	            }
-	          });
-	        })();
+	        backgroundTimeline.to(this.canvas, duration, {
+	          onStart: function onStart() {
+	            active = backgroundTimeline.getActive()[0];
+	            _this.imageElement.tweens.push(active);
+	          },
+	          onUpdate: function onUpdate() {
+	            progress = active.progress();
+	            _this.animateInCircleFrame(progress);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTween(active);
+	          }
+	        });
 	      }
 	    }
 	  }]);
@@ -8199,8 +8171,8 @@
 	  _createClass(MultiAuraStep, [{
 	    key: 'fillInFeatheredCircle',
 	    value: function fillInFeatheredCircle(pattern, radius, feather) {
-	      var reverse = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
-	      var centered = arguments.length <= 4 || arguments[4] === undefined ? false : arguments[4];
+	      var reverse = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+	      var centered = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
 	
 	      var tempCanvas = this.canvasUtils.createHiDPICanvas();
 	      tempCanvas.width = this.canvas.width;
@@ -8230,10 +8202,10 @@
 	  }, {
 	    key: 'animateInMultiAuraFrame',
 	    value: function animateInMultiAuraFrame() {
-	      var progress = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
-	      var startR = arguments.length <= 1 || arguments[1] === undefined ? this.canvas.width : arguments[1];
-	      var fill = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
-	      var comp = arguments.length <= 3 || arguments[3] === undefined ? animationUtils.BLEND_NORMAL : arguments[3];
+	      var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+	      var startR = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.canvas.width;
+	      var fill = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+	      var comp = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : animationUtils.BLEND_NORMAL;
 	
 	      if (!fill) {
 	        return;
@@ -8297,7 +8269,7 @@
 	    value: function animateInMultiAura() {
 	      var _this = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 	
 	      var fill = null;
 	      var comp = this.imageElement.treatments.groupAuraColors.length > 0 ? 'screen' : 'lighten';
@@ -8308,37 +8280,35 @@
 	          _this.animateInMultiAuraFrame(1, _this.canvas.width, _this.getMultiAuraFill(), comp);
 	        });
 	      } else {
-	        (function () {
-	          var active = null;
+	        var active = null;
 	
-	          var auraTimeline = new Timeline({
-	            onStart: function onStart() {
-	              _this.imageElement.timelines.push(auraTimeline);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.killTimeline(auraTimeline);
-	            }
-	          });
-	          auraTimeline.to(_this.canvas, duration, {
-	            onStart: function onStart() {
-	              active = auraTimeline.getActive()[0];
-	              fill = _this.getMultiAuraFill();
-	              _this.imageElement.fills = [fill];
-	              _this.imageElement.isDrawing = false;
-	              _this.imageElement.tweens.push(active);
-	            },
-	            onUpdate: function onUpdate() {
-	              var progress = active.progress();
-	              var r = ease.exp(startR, _this.canvas.width, progress);
+	        var auraTimeline = new Timeline({
+	          onStart: function onStart() {
+	            _this.imageElement.timelines.push(auraTimeline);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.killTimeline(auraTimeline);
+	          }
+	        });
+	        auraTimeline.to(this.canvas, duration, {
+	          onStart: function onStart() {
+	            active = auraTimeline.getActive()[0];
+	            fill = _this.getMultiAuraFill();
+	            _this.imageElement.fills = [fill];
+	            _this.imageElement.isDrawing = false;
+	            _this.imageElement.tweens.push(active);
+	          },
+	          onUpdate: function onUpdate() {
+	            var progress = active.progress();
+	            var r = ease.exp(startR, _this.canvas.width, progress);
 	
-	              _this.animateInMultiAuraFrame(progress, r, _this.imageElement.fills[0], comp);
-	            },
-	            onComplete: function onComplete() {
-	              _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
-	              _this.imageElement.killTween(active);
-	            }
-	          });
-	        })();
+	            _this.animateInMultiAuraFrame(progress, r, _this.imageElement.fills[0], comp);
+	          },
+	          onComplete: function onComplete() {
+	            _this.imageElement.canvasSnapshot = _this.context.createPattern(_this.canvas, 'no-repeat');
+	            _this.imageElement.killTween(active);
+	          }
+	        });
 	      }
 	    }
 	  }, {
@@ -8492,12 +8462,12 @@
 	  _inherits(JsonElement, _PanelComponent);
 	
 	  function JsonElement() {
-	    var reqPath = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
-	    var respPath = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+	    var reqPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+	    var respPath = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 	
 	    _classCallCheck(this, JsonElement);
 	
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(JsonElement).call(this));
+	    var _this = _possibleConstructorReturn(this, (JsonElement.__proto__ || Object.getPrototypeOf(JsonElement)).call(this));
 	
 	    _this.reqPath = reqPath;
 	    _this.respPath = respPath;
@@ -8551,7 +8521,7 @@
 	
 	      var tl = new TimelineMax({
 	        onComplete: function onComplete() {
-	          _get(Object.getPrototypeOf(JsonElement.prototype), 'killTimeline', _this2).call(_this2, tl);
+	          _get(JsonElement.prototype.__proto__ || Object.getPrototypeOf(JsonElement.prototype), 'killTimeline', _this2).call(_this2, tl);
 	        }
 	      });
 	      tl.to(this.scrim, animationUtils.POINTS_FADE_DURATION, { opacity: 1 });
@@ -8560,70 +8530,70 @@
 	  }, {
 	    key: 'analyze',
 	    value: function analyze() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.injectJSON(this.reqJson, duration / this.timeFactor, 'Analyzing');
 	    }
 	  }, {
 	    key: 'face',
 	    value: function face() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.injectJSON(this.getFaceInfo(), duration / this.timeFactor, 'Face');
 	    }
 	  }, {
 	    key: 'ears',
 	    value: function ears() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.EARS), duration / this.timeFactor, 'Ears');
 	    }
 	  }, {
 	    key: 'forehead',
 	    value: function forehead() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.FOREHEAD), duration / this.timeFactor, 'Forehead');
 	    }
 	  }, {
 	    key: 'nose',
 	    value: function nose() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.NOSE), duration / this.timeFactor, 'Nose');
 	    }
 	  }, {
 	    key: 'mouth',
 	    value: function mouth() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.MOUTH), duration / this.timeFactor, 'Mouth');
 	    }
 	  }, {
 	    key: 'chin',
 	    value: function chin() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.CHIN), duration / this.timeFactor, 'Chin');
 	    }
 	  }, {
 	    key: 'eyes',
 	    value: function eyes() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.EYES), duration / this.timeFactor, 'Eyes');
 	    }
 	  }, {
 	    key: 'allFeatures',
 	    value: function allFeatures() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.injectJSON(this.filterLandmarks(faceUtils.LANDMARK_SECTIONS.FULL), duration / this.timeFactor, 'Face');
 	    }
 	  }, {
 	    key: 'emotion',
 	    value: function emotion() {
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      this.injectJSON([this.getEmotionInfo()], duration / this.timeFactor, 'Emotion', false, true);
 	    }
@@ -8632,7 +8602,7 @@
 	    value: function complete() {
 	      var _this3 = this;
 	
-	      var duration = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	
 	      var json = [];
 	      this.json.forEach(function (item, i) {
@@ -8656,7 +8626,7 @@
 	  }, {
 	    key: 'injectTitle',
 	    value: function injectTitle() {
-	      var title = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	      var title = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	      if (!title) {
 	        return;
@@ -8688,7 +8658,7 @@
 	  }, {
 	    key: 'syntaxHighlighting',
 	    value: function syntaxHighlighting(json) {
-	      var breakString = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+	      var breakString = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
 	
 	      var html = JSON.stringify(json, null, breakString);
 	      var re = new RegExp('{\n</br>', 'g');
@@ -8746,7 +8716,7 @@
 	      }
 	      var tl = new TimelineMax({
 	        onComplete: function onComplete() {
-	          _get(Object.getPrototypeOf(JsonElement.prototype), 'killTimeline', _this4).call(_this4, tl);
+	          _get(JsonElement.prototype.__proto__ || Object.getPrototypeOf(JsonElement.prototype), 'killTimeline', _this4).call(_this4, tl);
 	        }
 	      });
 	      tl.to(this.scrim, animationUtils.POINTS_FADE_DURATION, {
@@ -8788,7 +8758,7 @@
 	
 	var Threeup = function () {
 	  function Threeup() {
-	    var imgPath = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	    var imgPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	    _classCallCheck(this, Threeup);
 	
@@ -8829,8 +8799,8 @@
 	  }, {
 	    key: 'newImage',
 	    value: function newImage() {
-	      var imageUrl = arguments.length <= 0 || arguments[0] === undefined ? this.imgPath : arguments[0];
-	      var skip = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+	      var imageUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.imgPath;
+	      var skip = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 	
 	      this.imgPath = imageUrl;
 	
@@ -8853,7 +8823,7 @@
 	    value: function newHero() {
 	      var _this = this;
 	
-	      var imageUrl = arguments.length <= 0 || arguments[0] === undefined ? this.imgPath : arguments[0];
+	      var imageUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.imgPath;
 	
 	      this.noMoreHeroes();
 	
@@ -8963,7 +8933,7 @@
 	  }, {
 	    key: 'addViewPicker',
 	    value: function addViewPicker() {
-	      var callback = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	
 	      var viewsWrap = document.createElement('div');
 	
@@ -10170,8 +10140,8 @@
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../../node_modules/css-loader/index.js?sourceMap!./../../node_modules/sass-loader/index.js?sourceMap!./main.scss", function() {
-				var newContent = require("!!./../../node_modules/css-loader/index.js?sourceMap!./../../node_modules/sass-loader/index.js?sourceMap!./main.scss");
+			module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/sass-loader/index.js?sourceMap!./main.scss", function() {
+				var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/sass-loader/index.js?sourceMap!./main.scss");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
