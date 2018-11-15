@@ -59,7 +59,7 @@ node server.js
 Photos can be grouped together in sessions. To send photos to the front end and/or share them socially, follow these steps.
 
 1. Add photo(s) (with faces, this is about emotions, after all!) into your in directory (by default, `site/in`). This can be done automatically by setting this folder as the directory where a digital camera outputs photos. You can manually add photos to this folder as well, by simply dragging and dropping them in. Please note that all images in `/in` must have _unique file names_ to trigger the API. 
-2. Go to the [Keep/Kill](http://localhost:8080/buttons) (`localhost:8080/buttons`) page. To process the session, click on "Keep". To cancel session, click on "Kill" (you will need to add more photos if you kill the session.)
+2. Go to the [Keep/Kill](http://localhost:8080/buttons) (`localhost:8080/buttons`) page. To process the session, click on "Keep". To cancel session, click on "Kill" (you will need to add more photos if you kill the session).
 3. Watch the [panel](http://localhost:8080) (`localhost:8080`) and [grid](http://localhost:8080?showgrid) (`http://localhost:8080?showgrid`) pages to see the output from the session.
 4. If you set up social sharing (see below), these sessions will be saved at this point.
 
@@ -78,22 +78,26 @@ This experience can post to [Twitter](https://twitter.com/GCPEmotobooth/status/7
 * `/buttons` - "Keep" ends a session; "Kill" throws out that session's photos.
 * `/history` - Monitoring system to delete posts if necessary
 
-## JSON & Grid Options
+## JSON Panel and Grid Options
 
-There are several querystrings that can be added to the grid page's url to affect its appearance and behavior. Default behavior (what happens without a querystring) is what we would want in a production environment.
+There are several query strings that can be added to the panel and grid page urls to affect the display's appearance and behavior. Default behavior (what happens without a query string) can be considered a default for the production environment.
 
-- `?showgrid`: **the exception; we will want to use this on one of the production screens** shows the grid / historical view rather than the json / latest view.
-- `?zoom`: resize UI so panels can fit, based on width, in your window.
-- `?controls`: in json view, adds toolbar with shortcuts to taking certain photos to bottom of screen
-- `?dontprint`: tells the application not to render final photostrip to the `site/out-print` folder
-- `?prepopulate`: in grid view, use pregenerated images to fill out grid if we don't actually have enough historical images to do so. Otherwise, only historical processed images will be used.
-- Timing options: to speed up or skip steps of the sequence. Defaults to `normal`.
-  - `?timing=fast&`: all steps run, but faster than usual.
-  - `?timing=finalOnly&`: all steps are skipped; only final aura is rendered.
-  - `?timing=noFace&`: all face-related steps are skipped; only aura animates in.
-  - `?timing=noAura&`: all face-related steps run, and then the animation stops.
-  - `?timing=noChrome&`: all face and aura animations run, but chrome does not render.
-- Event options: Emotobooth supports multiple designs for different events (these are added and handled inside of main.js.) Some events include:
+Multiple query strings can be combined to customize the display. For example, the grid view might be configured as follows to prepopulate it with images and zoom the display: `localhost:8080?showgrid?prepopulate?zoom`. If you wanted to show the panel view _without_ the bottom chrome (hiding the white bottom bar with emotion color indicator dots) you can configure that view as follows: `http://localhost:8080/?timing=noChrome&`.
+
+Available query strings:
+
+- `showgrid`: **the exception; we will want to use this on one of the production screens** shows the "grid"/historical view rather than the "panel" (photo + JSON) view.
+- `zoom`: resizes the UI so panels can fit, based on width, in the browser window.
+- `controls`: in panel view, adds a toolbar with shortcuts to taking certain photos to bottom of screen
+- `dontprint`: tells the application not to render final photostrip to the `site/out-print` folder
+- `prepopulate`: in grid view, use pregenerated images to fill out the grid if we don't actually have enough historical images to do so. Otherwise, only historical processed images will be displayed.
+- Timing options for panel view, to speed up or skip steps of the sequence (defaults to `normal`).
+  - `timing=fast&`: all steps run, but faster than usual.
+  - `timing=finalOnly&`: all steps are skipped; only final aura is rendered.
+  - `timing=noFace&`: all face-related steps are skipped; only aura animates in.
+  - `timing=noAura&`: all face-related steps run, and then the animation stops.
+  - `timing=noChrome&`: all face and aura animations run, but image chrome does not render.
+- Event options: Emotobooth supports multiple designs for different events (these are added and handled inside of main.js). Some events include:
   - `event=horizon`
   - `event=next`
 
