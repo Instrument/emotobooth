@@ -68,9 +68,9 @@ Photos can be grouped together in sessions. To send photos to the front end and/
 This experience can post to [Twitter](https://twitter.com/GCPEmotobooth/status/733065931027423232) and [GitHub](https://gist.github.com/GCPEmotobooth/2c36647dc2fba279aa250d12ce8cb472), letting users easily share their photos.
 
 1. Duplicate the `credentials.json.example` file and rename it `credentials.json`.
-1. Fill out `credentials.json` with your credentials from Twitter and Github.
-1. From the terminal, run `ssh gist.github.com` to make sure you save your address to the known hosts.
-1. Add the `share` flag when running the server, so `node server.js --share` (vs. `node server.js`).
+2. Fill out `credentials.json` with your credentials from Twitter and Github.
+3. From the terminal, run `ssh gist.github.com` to make sure you save your address to the known hosts.
+4. Add the `share` flag when running the server, so `node server.js --share` (vs. `node server.js`).
 
 ## Endpoints
 
