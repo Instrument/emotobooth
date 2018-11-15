@@ -80,11 +80,11 @@ This experience can post to [Twitter](https://twitter.com/GCPEmotobooth/status/7
 
 ## JSON Panel and Grid Options
 
-There are several query strings that can be added to the panel and grid page urls to affect the display's appearance and behavior. Default behavior (what happens without a query string) can be considered a default for the production environment.
+There are several query string parameters that can be used to affect the panel and grid page's display. Default behavior (what happens without a query string) can be considered a default for the production environment, with the exception of the grid view (which can only be seen at `localhost:8080?showgrid`)
 
-Multiple query strings can be combined to customize the display. For example, the grid view might be configured as follows to prepopulate it with images and zoom the display: `localhost:8080?showgrid?prepopulate?zoom`. If you wanted to show the panel view _without_ the bottom chrome (hiding the white bottom bar with emotion color indicator dots) you can configure that view as follows: `http://localhost:8080/?timing=noChrome&`.
+Multiple query string parameters can be combined to customize the display. For example, the grid view might be configured as follows to prepopulate it with images and zoom the display: `localhost:8080?showgrid&prepopulate&zoom`. If you wanted to show the panel view _without_ the bottom chrome (hiding the white bottom bar with emotion color indicator dots) you can configure that view as follows: `http://localhost:8080/?timing=noChrome&`.
 
-Available query strings:
+Query string parameters:
 
 - `showgrid`: **the exception; we will want to use this on one of the production screens** shows the "grid"/historical view rather than the "panel" (photo + JSON) view.
 - `zoom`: resizes the UI so panels can fit, based on width, in the browser window.
